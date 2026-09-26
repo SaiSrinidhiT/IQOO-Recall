@@ -61,11 +61,14 @@ class FtsIndex(private val database: () -> SupportSQLiteDatabase) {
     fun search(query: String, limit: Int = 50): List<Long> {
         val tokens = normalize(query).lowercase()
             .split(Regex("[^\\p{L}\\p{M}\\p{N}]+"))
-            .filter { it.length >= 2 }
+            .filter { it.length >= 2 && it !in STOPWORDS }
             .distinct()
             .take(16)
         if (tokens.isEmpty()) return emptyList()
-        val match = tokens.joinToString(" OR ") { "$it*" }
+        // Prefix-matching a 2-letter Latin word matches nearly every page ("hi*" hits "his", "high",
+        // "hindi"), so short Latin tokens must match whole. Indic words keep the prefix: their case
+        // endings attach to the stem.
+        val match = tokens.joinToString(" OR ") { t -> if (t.length <= 2 && t.all { it in 'a'..'z' }) "\"$t\"" else "$t*" }
         val sql = when (module) {
             Module.FTS5 -> "SELECT doc_id FROM fts_chunks WHERE fts_chunks MATCH ? ORDER BY bm25(fts_chunks) LIMIT ?"
             Module.FTS4 -> "SELECT doc_id, COUNT(*) AS hits FROM fts_chunks WHERE fts_chunks MATCH ? GROUP BY doc_id ORDER BY hits DESC LIMIT ?"
@@ -81,6 +84,20 @@ class FtsIndex(private val database: () -> SupportSQLiteDatabase) {
         Normalizer.normalize(DigitNormalizer.normalize(s), Normalizer.Form.NFC).replace("\u200C", "").replace("\u200D", "")
 
     companion object {
+        /**
+         * Request words that say nothing about which document is meant ("please show my ..."). OR-ing
+         * them into the match let any page containing "my" or "show" count as a keyword hit.
+         */
+        private val STOPWORDS = setOf(
+            "a", "an", "the", "my", "me", "mine", "our", "is", "are", "am", "was", "be", "of", "for", "to", "in", "on", "at",
+            "and", "or", "with", "from", "by", "it", "its", "this", "that", "these", "those", "please", "pls", "plz",
+            "show", "give", "get", "find", "open", "see", "view", "send", "need", "want", "can", "could", "would", "you", "your",
+            "do", "does", "did", "have", "has", "had", "what", "whats", "which", "when", "where", "how", "who", "all", "any",
+            "some", "about", "hi", "hello", "hey", "ok", "okay", "thanks", "thank", "document", "documents", "doc", "docs",
+            "file", "files", "copy", "ki", "ka", "ke", "ko", "hai", "mera", "meri", "mere", "dikhao", "chahiye", "naa", "na",
+            "nenu", "cheyyi", "chupinchu", "kavali",
+        )
+
         /** Combining marks in the Devanagari and Telugu blocks. */
         fun indicMarks(): String {
             val sb = StringBuilder()

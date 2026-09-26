@@ -1,6 +1,7 @@
 package com.hackathon.recall
 
 import android.app.Application
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -21,8 +22,10 @@ import com.hackathon.recall.ingest.IngestPipeline
 import com.hackathon.recall.ingest.MediaStoreScanner
 import com.hackathon.recall.ml.ModelFiles
 import com.hackathon.recall.ml.ModelManager
+import com.hackathon.recall.model.DocType
 import com.hackathon.recall.ocr.OcrEngine
 import com.hackathon.recall.search.AnswerGenerator
+import com.hackathon.recall.search.ChatResponder
 import com.hackathon.recall.search.HybridSearch
 import com.hackathon.recall.search.IntentParser
 import com.hackathon.recall.search.Lexicon
@@ -60,7 +63,13 @@ class AppContainer(private val app: Application) {
     private val lexicon by lazy { Lexicon.parse(asset("rule_lexicon.json")) }
     val ruleParser by lazy { RuleFallbackParser(lexicon) }
     val queryEngine by lazy {
-        QueryEngine(IntentParser(models.llm, ruleParser), HybridSearch(repository, models), AnswerGenerator(app, models.llm), repository)
+        QueryEngine(
+            IntentParser(models.llm, ruleParser),
+            HybridSearch(repository, models),
+            AnswerGenerator(app, models.llm),
+            ChatResponder(app, models.llm, ruleParser),
+            repository,
+        )
     }
     val enricher by lazy { LlmEnricher(repository, models.llm, reminders) }
     val packBuilder by lazy { PackBuilder(app, repository, AadhaarMasker(ocr)) }
@@ -73,6 +82,7 @@ class AppContainer(private val app: Application) {
                 database.openHelper.writableDatabase // opens SQLCipher and creates the FTS table
                 vault
                 _ready.value = true
+                clearBadOwnerNamesOnce()
             } catch (t: Throwable) {
                 Log.e(TAG, "vault failed to open: ${t.javaClass.simpleName}")
             }
@@ -87,8 +97,23 @@ class AppContainer(private val app: Application) {
 
     private fun asset(name: String): String = app.assets.open(name).use { it.readBytes().decodeToString() }
 
+    /**
+     * Runs once per [CLEANUP_KEY] version: re-runs owner extraction over stored OCR text so fixes to
+     * OwnerNameExtractor (restaurant names off receipts, towns off Aadhaar address blocks) correct
+     * documents already in the vault, with no rescan. Names the user tagged by hand are left alone.
+     */
+    private suspend fun clearBadOwnerNamesOnce() {
+        val prefs = app.getSharedPreferences("settings", Context.MODE_PRIVATE)
+        if (prefs.getBoolean(CLEANUP_KEY, false)) return
+        val manual = com.hackathon.recall.ui.People.manuallyTagged(database)
+        val changed = repository.reextractOwners(manual)
+        if (changed > 0) Log.i(TAG, "re-extracted owner name on $changed document(s)")
+        prefs.edit().putBoolean(CLEANUP_KEY, true).apply()
+    }
+
     private companion object {
         const val TAG = "AppContainer"
+        const val CLEANUP_KEY = "owner_cleanup_v2"
     }
 }
 

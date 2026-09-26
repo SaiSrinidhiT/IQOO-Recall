@@ -46,6 +46,36 @@
     <string name="action_allow_access">Allow photo access</string>
     <string name="action_not_now">Not now</string>
 
+    <!-- Chat -->
+    <string name="chat_title">Ask Recall</string>
+    <string name="chat_new">New chat</string>
+    <string name="chat_empty_title">What are you looking for?</string>
+    <string name="chat_empty_subtitle">Ask in English, తెలుగు or हिंदी. Everything stays on this phone.</string>
+    <string name="chat_recent">Recent chats</string>
+    <string name="chat_delete">Delete chat</string>
+    <plurals name="chat_turns">
+        <item quantity="one">%d message</item>
+        <item quantity="other">%d messages</item>
+    </plurals>
+    <string name="chat_clear">Clear</string>
+    <string name="chat_suggestions">Try asking</string>
+    <string name="chat_hint">Ask for any document…</string>
+    <string name="chat_searching">Searching your documents…</string>
+    <string name="chat_error">Something went wrong. Please try again.</string>
+    <string name="chat_not_found">I couldn\'t find that. Try other words, or scan it now.</string>
+    <string name="chat_scan">Scan a document</string>
+    <string name="chat_pack_ready">Your %1$s checklist is ready.</string>
+    <string name="chat_open_checklist">Open checklist</string>
+    <string name="chat_expiring">These expire soonest:</string>
+    <string name="chat_open">Open</string>
+    <string name="chat_share_pdf">Share as PDF</string>
+    <string name="suggest_show_type">Show my %1$s</string>
+    <string name="suggest_expiring">What expires in the next 3 months?</string>
+    <string name="suggest_car_insurance">I need my car insurance papers</string>
+    <string name="suggest_resume_pdf">Send my resume as PDF</string>
+    <string name="suggest_salary">My latest salary slip</string>
+    <string name="suggest_home_loan">Get home loan documents ready</string>
+
     <!-- Home -->
     <string name="ask_hint">Ask in English, తెలుగు or हिंदी</string>
     <string name="action_ask">Ask</string>
@@ -113,7 +143,31 @@
     <string name="field_source">Source</string>
     <string name="field_source_missing">The original was deleted from the gallery; the encrypted copy is kept.</string>
     <string name="field_entities">Details found</string>
-    <string name="field_confidence">Detected by %1$s (%2$d%%)</string>
+    <string name="field_confidence">Detected by %1$s · %2$d%%</string>
+    <string name="owner_dialog_title">Whose is this?</string>
+    <string name="owner_unassigned">Tap to add</string>
+    <string name="owner_add_new">Or add someone new</string>
+    <string name="owner_remove">Remove name</string>
+    <string name="owner_new_name_hint">Name</string>
+    <string name="owner_relation_hint">Optionally, how should chat refer to them?</string>
+    <string name="relation_self">You</string>
+    <string name="relation_father">Father</string>
+    <string name="relation_mother">Mother</string>
+    <string name="relation_spouse">Spouse</string>
+    <string name="relation_son">Son</string>
+    <string name="relation_daughter">Daughter</string>
+    <string name="vault_people">People</string>
+    <string name="vault_everyone">Everyone</string>
+    <string name="confidence_user">Confirmed by you</string>
+    <string name="confidence_low_note" formatted="false">Below 80% confidence, so it\'s filed under Other documents until you confirm it.</string>
+    <string name="action_confirm_type">Yes, it\'s a %1$s</string>
+    <string name="detector_rules">keyword rules</string>
+    <string name="detector_image">image model</string>
+    <string name="detector_llm">AI (Qwen)</string>
+    <string name="detector_user">you</string>
+    <string name="source_gallery">Gallery</string>
+    <string name="source_camera">Camera scan</string>
+    <string name="source_pdf">PDF</string>
     <string name="action_change_type">Change type</string>
     <string name="action_edit_expiry">Edit expiry</string>
     <string name="expiry_hint">YYYY-MM-DD, or empty for none</string>
@@ -137,6 +191,13 @@
     <string name="scan_failed">Could not read this scan: %1$s</string>
     <string name="scan_not_document">This doesn\'t look like a document.</string>
     <string name="camera_permission_needed">Camera permission is needed to scan documents.</string>
+    <string name="scan_private_note">Processed privately on this phone</string>
+    <string name="scan_hint_dark">Move to better light</string>
+    <string name="scan_hint_steady">Hold the camera steady</string>
+    <string name="scan_hint_ready">Ready — tap to capture</string>
+    <string name="scan_ready_badge">Ready</string>
+    <string name="scan_gallery">Gallery</string>
+    <string name="scan_multi_page">Multi-page</string>
 
 
     <!-- Models and benchmark -->
@@ -221,5 +282,12 @@
     <string name="doc_PAYMENT_SCREENSHOT">Payment screenshot</string>
     <string name="doc_WARRANTY">Warranty card</string>
     <string name="doc_TICKET">Ticket</string>
+    <string name="doc_RESUME">Resume / CV</string>
     <string name="doc_OTHER_DOCUMENT">Other document</string>
+    <!-- Chat replies used when Qwen is unavailable -->
+    <string name="chat_reply_greeting">Hi! I can find your documents, answer questions from them and remind you before they expire. Try \"Show my PAN card\".</string>
+    <string name="chat_reply_thanks">You\'re welcome! Anything else you need from your documents?</string>
+    <string name="chat_reply_help">I find your saved documents, answer questions from them, share them as PDF with Aadhaar masked, and tell you what is expiring. Try \"What expires this month?\"</string>
+    <string name="chat_reply_bye">Bye! Your documents stay safe on this phone.</string>
+    <string name="chat_reply_offtopic">I can only help with the documents saved on this phone. Try \"Show my Aadhaar\" or \"What expires this month?\"</string>
 </resources>

@@ -3,6 +3,8 @@ package com.hackathon.recall.search
 import com.hackathon.recall.data.DocumentEntity
 import com.hackathon.recall.data.DocumentRepository
 import com.hackathon.recall.data.toSummary
+import com.hackathon.recall.data.effectiveType
+import com.hackathon.recall.data.isTypeConfident
 import com.hackathon.recall.data.type
 import com.hackathon.recall.ml.Metrics
 import com.hackathon.recall.ml.ModelManager
@@ -23,7 +25,7 @@ class HybridSearch(private val repo: DocumentRepository, private val models: Mod
         } ?: emptyList()
         val all = repo.all()
         val byType = if (intent.docTypes.isEmpty()) emptyList() else all
-            .filter { it.type() in intent.docTypes }
+            .filter { it.effectiveType() in intent.docTypes }
             .sortedByDescending { it.toSummary().effectiveDate }
             .map { it.id }
         val fused = Rrf.fuse(listOf(keyword, semantic.map { it.first }, byType))
@@ -35,6 +37,8 @@ class HybridSearch(private val repo: DocumentRepository, private val models: Mod
         val docsById = all.associateBy { it.id }
         val hits = fused.mapNotNull { (id, score) ->
             val doc = docsById[id] ?: return@mapNotNull null
+            // Asked for a type: an unsure guess of that same type is not shown under it (it is "Other").
+            if (doc.type() in intent.docTypes && !doc.isTypeConfident()) return@mapNotNull null
             // Relevance gate: a document must match by keyword, by type, or by a reasonable cosine.
             val relevant = id in keywordSet || id in typeSet || (cosine[id] ?: 0f) >= minCos
             if (!relevant) return@mapNotNull null

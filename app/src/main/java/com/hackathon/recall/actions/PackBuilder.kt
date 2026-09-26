@@ -12,7 +12,10 @@ import android.text.StaticLayout
 import android.text.TextPaint
 import androidx.core.content.FileProvider
 import com.hackathon.recall.R
+import com.hackathon.recall.data.DocumentEntity
 import com.hackathon.recall.data.DocumentRepository
+import com.hackathon.recall.data.displayTitle
+import com.hackathon.recall.data.effectiveType
 import com.hackathon.recall.i18n.docTypeName
 import com.hackathon.recall.i18n.inLang
 import com.hackathon.recall.ingest.ImageLoader
@@ -47,31 +50,63 @@ class PackBuilder(private val context: Context, private val repo: DocumentReposi
             var pageNo = 1
             for (docId in checklist.packDocIds) {
                 val doc = repo.byId(docId) ?: continue
-                val bytes = repo.readOriginal(doc)
-                val bitmaps = if (doc.mimeType == "application/pdf") ImageLoader.renderPdf(bytes, RENDER_DIM) else listOf(ImageLoader.decode(bytes, RENDER_DIM))
-                val layouts = repo.pages(docId).map { json.decodeFromString(OcrResult.serializer(), it.layoutJson) }
-                val aadhaarPages = repo.entities(docId).filter { it.kind == EntityKind.AADHAAR.db }.map { it.page }.toSet()
-                for ((i, bmp) in bitmaps.withIndex()) {
-                    when (val r = masker.mask(bmp, layouts.getOrNull(i), i in aadhaarPages)) {
-                        is AadhaarMasker.Result.Blocked -> return@withContext Result.Blocked(doc.titleEn, r.reason)
-                        is AadhaarMasker.Result.Ok -> {
-                            pageNo++
-                            addImagePage(pdf, r.bitmap, pageNo)
-                            r.bitmap.recycle()
-                        }
-                    }
-                    bmp.recycle()
-                }
+                pageNo = appendDocument(pdf, doc, pageNo)
             }
-            val dir = File(context.cacheDir, SHARE_DIR).apply { mkdirs() }
-            val out = File(dir, "recall-pack-${System.currentTimeMillis()}.pdf")
-            out.outputStream().use { pdf.writeTo(it) }
-            Result.Ready(out, pageNo)
+            Result.Ready(write(pdf, "recall-pack-${System.currentTimeMillis()}"), pageNo)
+        } catch (b: BlockedException) {
+            b.blocked
         } catch (t: Throwable) {
             Result.Failed(t.message ?: t.javaClass.simpleName)
         } finally {
             pdf.close()
         }
+    }
+
+    /** One document as a masked PDF (no cover page), for "Share as PDF" from chat results. */
+    suspend fun buildDocument(docId: Long): Result = withContext(Dispatchers.Default) {
+        val pdf = PdfDocument()
+        try {
+            val doc = repo.byId(docId) ?: return@withContext Result.Failed("document not found")
+            val pages = appendDocument(pdf, doc, 0)
+            val name = doc.displayTitle().ifBlank { doc.effectiveType().labelEn }.replace(Regex("[^A-Za-z0-9]+"), "-").trim('-').take(40).ifEmpty { "document" }
+            Result.Ready(write(pdf, "recall-$name"), pages)
+        } catch (b: BlockedException) {
+            b.blocked
+        } catch (t: Throwable) {
+            Result.Failed(t.message ?: t.javaClass.simpleName)
+        } finally {
+            pdf.close()
+        }
+    }
+
+    private class BlockedException(val blocked: Result.Blocked) : Exception()
+
+    /** Appends [doc]'s pages, Aadhaar-masked, after page [pageNo]; returns the last page number written. */
+    private suspend fun appendDocument(pdf: PdfDocument, doc: DocumentEntity, pageNo: Int): Int {
+        var n = pageNo
+        val bytes = repo.readOriginal(doc)
+        val bitmaps = if (doc.mimeType == "application/pdf") ImageLoader.renderPdf(bytes, RENDER_DIM) else listOf(ImageLoader.decode(bytes, RENDER_DIM))
+        val layouts = repo.pages(doc.id).map { json.decodeFromString(OcrResult.serializer(), it.layoutJson) }
+        val aadhaarPages = repo.entities(doc.id).filter { it.kind == EntityKind.AADHAAR.db }.map { it.page }.toSet()
+        for ((i, bmp) in bitmaps.withIndex()) {
+            when (val r = masker.mask(bmp, layouts.getOrNull(i), i in aadhaarPages)) {
+                is AadhaarMasker.Result.Blocked -> throw BlockedException(Result.Blocked(doc.displayTitle(), r.reason))
+                is AadhaarMasker.Result.Ok -> {
+                    n++
+                    addImagePage(pdf, r.bitmap, n)
+                    r.bitmap.recycle()
+                }
+            }
+            bmp.recycle()
+        }
+        return n
+    }
+
+    private fun write(pdf: PdfDocument, baseName: String): File {
+        val dir = File(context.cacheDir, SHARE_DIR).apply { mkdirs() }
+        val out = File(dir, "$baseName.pdf")
+        out.outputStream().use { pdf.writeTo(it) }
+        return out
     }
 
     private fun cover(pdf: PdfDocument, checklist: ChecklistResult, title: String, lang: Lang, titles: Map<Long, String>) {

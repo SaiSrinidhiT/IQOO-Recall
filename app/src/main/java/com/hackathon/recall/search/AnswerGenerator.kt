@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.Log
 import com.hackathon.recall.R
 import com.hackathon.recall.data.DocumentEntity
+import com.hackathon.recall.data.displayTitle
+import com.hackathon.recall.data.effectiveType
 import com.hackathon.recall.i18n.inLang
 import com.hackathon.recall.ml.GenieXQwen
 import com.hackathon.recall.ml.Metrics
@@ -36,7 +38,7 @@ class AnswerGenerator(private val context: Context, private val llm: GenieXQwen)
                 val user = buildString {
                     appendLine("Documents:")
                     for (d in top) {
-                        appendLine("[id ${d.id}] ${d.titleEn}")
+                        appendLine("[id ${d.id}] ${d.effectiveType().labelEn} ${d.displayTitle()}".trim())
                         appendLine(d.ocrText.take(CONTEXT_CHARS))
                         appendLine()
                     }
@@ -55,7 +57,7 @@ class AnswerGenerator(private val context: Context, private val llm: GenieXQwen)
                 Log.w(TAG, "LLM answer failed: ${e.javaClass.simpleName}")
             }
         }
-        val titles = top.joinToString(", ") { it.titleEn }
+        val titles = top.joinToString(", ") { it.displayTitle().ifBlank { it.effectiveType().labelEn } }
         return Answer(strings.resources.getQuantityString(R.plurals.answer_found_docs, docs.size, docs.size, titles), top.map { it.id }, "template")
     }
 

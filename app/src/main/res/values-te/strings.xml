@@ -184,5 +184,12 @@
     <string name="doc_PAYMENT_SCREENSHOT">చెల్లింపు స్క్రీన్‌షాట్</string>
     <string name="doc_WARRANTY">వారంటీ కార్డ్</string>
     <string name="doc_TICKET">టికెట్</string>
+    <string name="doc_RESUME">రెజ్యూమే / బయోడేటా</string>
     <string name="doc_OTHER_DOCUMENT">ఇతర పత్రం</string>
+    <!-- Chat replies used when Qwen is unavailable -->
+    <string name="chat_reply_greeting">నమస్కారం! మీ పత్రాలను వెతకగలను, వాటి గురించి ప్రశ్నలకు సమాధానం ఇవ్వగలను, గడువు ముగిసే ముందు గుర్తు చేయగలను. \"నా PAN కార్డ్ చూపించు\" అని అడిగి చూడండి.</string>
+    <string name="chat_reply_thanks">స్వాగతం! మీ పత్రాల గురించి ఇంకేమైనా కావాలా?</string>
+    <string name="chat_reply_help">మీరు సేవ్ చేసిన పత్రాలను వెతుకుతాను, వాటి నుండి ప్రశ్నలకు సమాధానం ఇస్తాను, ఆధార్ దాచి PDFగా షేర్ చేస్తాను, ఏవి గడువు ముగుస్తున్నాయో చెబుతాను.</string>
+    <string name="chat_reply_bye">సెలవు! మీ పత్రాలు ఈ ఫోన్‌లోనే సురక్షితంగా ఉంటాయి.</string>
+    <string name="chat_reply_offtopic">ఈ ఫోన్‌లో సేవ్ చేసిన మీ పత్రాల విషయంలో మాత్రమే సహాయం చేయగలను. \"నా ఆధార్ చూపించు\" అని అడిగి చూడండి.</string>
 </resources>

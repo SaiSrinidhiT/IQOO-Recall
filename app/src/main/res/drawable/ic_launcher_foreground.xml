@@ -1,23 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Document page with a folded corner and a magnifier: "find your papers". 108dp canvas, art inside the 66dp safe zone. -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-    <path
-        android:fillColor="#FFFDF8F3"
-        android:pathData="M36,30h26l10,10v36a2,2 0,0 1,-2 2H36a2,2 0,0 1,-2 -2V32a2,2 0,0 1,2 -2z" />
-    <path
-        android:fillColor="#FFC9D6E8"
-        android:pathData="M62,30l10,10h-8a2,2 0,0 1,-2 -2z" />
-    <path
-        android:fillColor="#FF1F3A5F"
-        android:pathData="M40,46h24v3H40zM40,53h18v3H40zM40,60h14v3H40z" />
-    <path
-        android:fillColor="#FFF2A541"
-        android:pathData="M63,56a9,9 0,1 1,0 18a9,9 0,1 1,0 -18zM63,60a5,5 0,1 0,0 10a5,5 0,1 0,0 -10z" />
-    <path
-        android:fillColor="#FFF2A541"
-        android:pathData="M68.6,71.8l2.8,-2.8l7,7l-2.8,2.8z" />
-</vector>
+<!-- The art is a pre-rendered rounded-square icon with its own white card and shadow; inset it so
+     the adaptive-icon mask (circle/squircle/rounded-square, varies by launcher) frames it rather than
+     cropping into the card's corners. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_launcher_art"
+    android:insetLeft="14%"
+    android:insetTop="14%"
+    android:insetRight="14%"
+    android:insetBottom="14%" />

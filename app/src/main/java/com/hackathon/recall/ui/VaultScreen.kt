@@ -44,9 +44,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -62,8 +64,9 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.hackathon.recall.R
 import com.hackathon.recall.data.DocumentEntity
-import com.hackathon.recall.data.type
+import com.hackathon.recall.data.effectiveType
 import com.hackathon.recall.i18n.docTypeName
+import com.hackathon.recall.search.Relation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,23 +75,28 @@ fun VaultScreen(nav: NavHostController, initialCategory: String? = null) {
     val context = LocalContext.current
     val docs by container.repository.observeDocuments().collectAsState(emptyList())
 
-    val categoryDocTypes = DocCategory.TYPES
+    val categoryKeys = DocCategory.TYPES.keys + DocCategory.OTHER
     val initialFilterValue = initialCategory ?: "all"
 
     var activeFilter by rememberSaveable { mutableStateOf<String>(initialFilterValue) }
+    var personFilter by rememberSaveable { mutableStateOf<String?>(null) }
     var query by rememberSaveable { mutableStateOf("") }
     var view by rememberSaveable { mutableStateOf("list") } // "list" or "grid"
-    
-    val types = docs.map { it.type() }.distinct()
-    
+
+    val owners = remember(docs) { docs.mapNotNull { it.ownerName }.distinct().sorted() }
+    var relations by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
+    LaunchedEffect(Unit) { relations = People.relations(container.database) }
+    val relationByName = remember(relations) { relations.entries.associate { (k, v) -> v to Relation.fromDb(k) } }
+
     val filteredDocs = docs.filter { d ->
         val matchesCategory = when {
             activeFilter == "all" -> true
-            activeFilter in categoryDocTypes -> d.docType in (categoryDocTypes[activeFilter] ?: emptySet())
-            else -> d.docType == activeFilter
+            activeFilter in categoryKeys -> DocCategory.of(d) == activeFilter
+            else -> d.effectiveType().name == activeFilter
         }
-        val matchesQuery = query.isBlank() || context.docTypeName(d.type()).contains(query, ignoreCase = true) || (d.ownerName?.contains(query, ignoreCase = true) == true)
-        matchesCategory && matchesQuery
+        val matchesPerson = personFilter == null || d.ownerName == personFilter
+        val matchesQuery = query.isBlank() || context.docTypeName(d.effectiveType()).contains(query, ignoreCase = true) || (d.ownerName?.contains(query, ignoreCase = true) == true)
+        matchesCategory && matchesPerson && matchesQuery
     }
     
     Scaffold(
@@ -126,15 +134,31 @@ fun VaultScreen(nav: NavHostController, initialCategory: String? = null) {
                     Box(Modifier.clip(RoundedCornerShape(16.dp)).background(if (isAll) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface).border(1.dp, if (isAll) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp)).clickable { activeFilter = "all" }.padding(horizontal = 16.dp, vertical = 6.dp)) {
                         Text("All", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = if (isAll) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground)
                     }
-                    val categoryLabels = listOf("identity" to "Identity", "income" to "Income", "health" to "Health", "property" to "Property")
-                    categoryLabels.forEach { (key, label) ->
+                    categoryKeys.forEach { key ->
+                        val label = stringResource(DocCategory.label(key))
                         val isSel = activeFilter == key
                         Box(Modifier.clip(RoundedCornerShape(16.dp)).background(if (isSel) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface).border(1.dp, if (isSel) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp)).clickable { activeFilter = key }.padding(horizontal = 16.dp, vertical = 6.dp)) {
                             Text(label, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = if (isSel) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground)
                         }
                     }
                 }
-                
+
+                if (owners.isNotEmpty()) {
+                    Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        val isEveryone = personFilter == null
+                        Box(Modifier.clip(RoundedCornerShape(16.dp)).background(if (isEveryone) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surface).border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp)).clickable { personFilter = null }.padding(horizontal = 14.dp, vertical = 6.dp)) {
+                            Text(stringResource(R.string.vault_everyone), fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                        }
+                        owners.forEach { name ->
+                            val label = relationByName[name]?.let { stringResource(relationLabel(it)) } ?: name
+                            val isSel = personFilter == name
+                            Box(Modifier.clip(RoundedCornerShape(16.dp)).background(if (isSel) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surface).border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp)).clickable { personFilter = name }.padding(horizontal = 14.dp, vertical = 6.dp)) {
+                                Text(label, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                            }
+                        }
+                    }
+                }
+
                 // Sort and View Toggles
                 Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     Text("Sort: Recent", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -191,7 +215,7 @@ fun VaultDocListItem(doc: DocumentEntity, onClick: () -> Unit, context: android.
         }
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
-            Text(context.docTypeName(doc.type()), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(context.docTypeName(doc.effectiveType()), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp)) {
                 Text(date, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(" • ", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -218,10 +242,10 @@ fun VaultDocGridItem(doc: DocumentEntity, onClick: () -> Unit, context: android.
         Box(Modifier.size(40.dp).background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(12.dp)), contentAlignment = Alignment.Center) {
             Icon(Icons.Default.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
         }
-        Text(context.docTypeName(doc.type()), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text(context.docTypeName(doc.effectiveType()), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, maxLines = 2, overflow = TextOverflow.Ellipsis)
         
         Surface(color = MaterialTheme.colorScheme.surfaceVariant, shape = RoundedCornerShape(4.dp)) {
-            Text(doc.type().name, fontSize = 10.sp, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(doc.effectiveType().name, fontSize = 10.sp, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         
         Text(statusText, fontSize = 11.sp, fontWeight = FontWeight.Medium, color = statusColor)

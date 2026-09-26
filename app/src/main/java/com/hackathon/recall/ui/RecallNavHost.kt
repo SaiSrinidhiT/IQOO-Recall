@@ -24,7 +24,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.hackathon.recall.R
-import com.hackathon.recall.data.type
+import com.hackathon.recall.data.effectiveType
 import kotlinx.coroutines.flow.StateFlow
 
 object Routes {
@@ -63,7 +63,7 @@ fun RecallRoot(renewalDocId: StateFlow<Long?>, onRenewalHandled: () -> Unit) {
             LaunchedEffect(pending) {
                 val id = pending ?: return@LaunchedEffect
                 container.repository.byId(id)?.let { doc ->
-                    nav.navigate(Routes.checklist(container.templates.renewalTemplateFor(doc.type()).id, id))
+                    nav.navigate(Routes.checklist(container.templates.renewalTemplateFor(doc.effectiveType()).id, id))
                 }
                 onRenewalHandled()
             }

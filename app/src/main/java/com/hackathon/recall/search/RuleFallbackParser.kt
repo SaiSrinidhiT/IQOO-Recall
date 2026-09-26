@@ -27,8 +27,13 @@ class RuleFallbackParser(private val lexicon: Lexicon) {
         val docTypes = docTypeHits.mapNotNull { DocType.parse(it.key) }.distinct()
         val template = templateHits.firstOrNull()?.key
         fun has(intent: String) = match(q, mapOf(intent to lexicon.intentWords[intent].orEmpty())).isNotEmpty()
+        val noDocument = docTypes.isEmpty() && template == null
+        // Small talk only when nothing else in the message asks for a document; "hi, show my aadhaar" is a find.
+        val smallTalk = noDocument && !has("reminders") && !has("pack") && !has("question") &&
+            (chatKindOf(q) != null || q.none { it.isLetterOrDigit() })
 
         val kind = when {
+            smallTalk -> IntentKind.CHAT
             has("reminders") && template == null -> IntentKind.REMINDERS
             template != null -> IntentKind.PACK
             has("pack") && docTypes.isNotEmpty() -> IntentKind.FIND
@@ -56,6 +61,11 @@ class RuleFallbackParser(private val lexicon: Lexicon) {
     }
 
     fun detectLanguage(query: String) = languageDetector.detect(query)
+
+    /** "greeting", "thanks", "help" or "bye" when the message contains small talk of that kind, else null. */
+    fun chatKind(query: String): String? = chatKindOf(QueryText.normalize(query))
+
+    private fun chatKindOf(normalized: String): String? = longestHits(match(normalized, lexicon.chatWords)).firstOrNull()?.key
 
     private fun match(q: String, table: Map<String, List<String>>): List<Hit> {
         val hits = ArrayList<Hit>()

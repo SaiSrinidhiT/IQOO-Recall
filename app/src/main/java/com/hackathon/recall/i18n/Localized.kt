@@ -58,5 +58,6 @@ fun docTypeRes(type: DocType): Int = when (type) {
     DocType.PAYMENT_SCREENSHOT -> R.string.doc_PAYMENT_SCREENSHOT
     DocType.WARRANTY -> R.string.doc_WARRANTY
     DocType.TICKET -> R.string.doc_TICKET
+    DocType.RESUME -> R.string.doc_RESUME
     DocType.OTHER_DOCUMENT -> R.string.doc_OTHER_DOCUMENT
 }

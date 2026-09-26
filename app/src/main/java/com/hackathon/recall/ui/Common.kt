@@ -32,6 +32,10 @@ import androidx.compose.ui.unit.dp
 import com.hackathon.recall.AppContainer
 import com.hackathon.recall.R
 import com.hackathon.recall.data.DocumentEntity
+import com.hackathon.recall.data.MIN_TYPE_CONFIDENCE
+import com.hackathon.recall.data.displayTitle
+import com.hackathon.recall.data.effectiveType
+import com.hackathon.recall.data.isTypeConfident
 import com.hackathon.recall.data.type
 import com.hackathon.recall.i18n.docTypeName
 import com.hackathon.recall.ingest.ImageLoader
@@ -46,9 +50,18 @@ fun SectionTitle(text: String, modifier: Modifier = Modifier) {
     Text(text, style = MaterialTheme.typography.titleMedium, modifier = modifier.padding(top = 16.dp, bottom = 8.dp))
 }
 
-/** Home/Vault category keys (also nav args for Routes.vaultCategory) and the doc types in each. */
+/**
+ * Home/Vault category keys (also nav args for Routes.vaultCategory) and the doc types in each. A
+ * document is grouped by its [effectiveType], so anything below [MIN_TYPE_CONFIDENCE] that the user
+ * hasn't confirmed is filed under [OTHER]. The detected type itself is kept.
+ */
 object DocCategory {
     const val OTHER = "other"
+
+    fun isConfident(doc: DocumentEntity): Boolean = doc.isTypeConfident()
+
+    fun of(doc: DocumentEntity): String = of(doc.effectiveType().name)
+
     val TYPES: Map<String, Set<String>> = linkedMapOf(
         "identity" to setOf("AADHAAR", "PAN", "DRIVING_LICENCE", "PASSPORT", "VOTER_ID"),
         "income" to setOf("SALARY_SLIP", "BANK_STATEMENT", "EMPLOYMENT_LETTER", "ITR_FORM16", "LOAN_SANCTION_EMI"),
@@ -78,8 +91,8 @@ fun DocRow(doc: DocumentEntity, onClick: () -> Unit, trailing: @Composable (() -
     ) {
         Thumbnail(doc, Modifier.size(52.dp))
         Column(Modifier.weight(1f)) {
-            Text(context.docTypeName(doc.type()), style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(doc.titleEn, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(context.docTypeName(doc.effectiveType()), style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(doc.displayTitle(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
         }
         doc.expiryOn?.let { ExpiryBadge(LocalDate.parse(it)) }
         trailing?.invoke()

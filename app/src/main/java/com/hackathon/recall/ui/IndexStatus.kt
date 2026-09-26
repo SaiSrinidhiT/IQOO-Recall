@@ -100,7 +100,7 @@ private fun ScanSummary(paused: Boolean, modifier: Modifier, onCategory: ((Strin
     val pending = n("pending")
     val scanned = n("done") + otherPhotos + failed
     val total = scanned + pending
-    val byCategory = docs.filter { it.sourceKind == SourceKind.GALLERY.db }.groupingBy { DocCategory.of(it.docType) }.eachCount()
+    val byCategory = docs.filter { it.sourceKind == SourceKind.GALLERY.db }.groupingBy { DocCategory.of(it) }.eachCount()
 
     Card(
         modifier.fillMaxWidth(),

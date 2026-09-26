@@ -15,7 +15,7 @@ import androidx.work.WorkerParameters
 import com.hackathon.recall.MainActivity
 import com.hackathon.recall.R
 import com.hackathon.recall.RecallApp
-import com.hackathon.recall.data.type
+import com.hackathon.recall.data.effectiveType
 import com.hackathon.recall.i18n.docTypeName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -82,7 +82,7 @@ object ReminderNotifier {
             .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             .putExtra(MainActivity.EXTRA_RENEWAL_DOC_ID, docId)
         val tap = PendingIntent.getActivity(context, reminderId.toInt(), open, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        val name = context.docTypeName(doc.type())
+        val name = context.docTypeName(doc.effectiveType())
         val title = if (offset > 0) context.resources.getQuantityString(R.plurals.expires_in_days, offset, name, offset)
         else context.getString(R.string.reminder_test_title, name)
         val notification = NotificationCompat.Builder(context, CHANNEL)

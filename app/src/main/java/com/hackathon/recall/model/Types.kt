@@ -30,6 +30,7 @@ enum class DocType(val labelEn: String, val hasExpiry: Boolean = false) {
     PAYMENT_SCREENSHOT("Payment screenshot"),
     WARRANTY("Warranty card", hasExpiry = true),
     TICKET("Ticket"),
+    RESUME("Resume or CV"),
     OTHER_DOCUMENT("Other document");
 
     companion object {

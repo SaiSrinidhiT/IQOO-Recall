@@ -8,9 +8,11 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-// Colors mapped from Next.js globals.css
+// Warm paper background (matches the launcher icon and the "paperwork assistant" tagline); cards
+// stay white so they read as pages sitting on that background. Matches themes.xml window_background,
+// so there's no colour flash between the pre-Compose window and the first Compose frame.
 private val LightPrimary = Color(0xFF254479) // Deep Blue
-private val LightBackground = Color(0xFFF8F9FB)
+private val LightBackground = Color(0xFFFDF8F3)
 private val LightSurface = Color(0xFFFFFFFF)
 private val LightForeground = Color(0xFF2C2D35)
 

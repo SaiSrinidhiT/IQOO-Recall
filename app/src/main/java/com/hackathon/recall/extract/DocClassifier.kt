@@ -147,6 +147,12 @@ object DocClassifier {
             en("warranty|guarantee card|warranty card", 4.0), any("वारंटी|వారంటీ", 4.0),
             en("serial\\s*(?:no|number)|model\\s*(?:no|number)|date of purchase|dealer", 1.5),
         ),
+        DocType.RESUME to listOf(
+            en("curriculum vitae|r[eé]sum[eé]|bio-?data", 3.0), any("बायोडाटा|रिज़्यूमे|బయోడేటా|రెజ్యూమే", 3.0),
+            en("work experience|professional experience|employment history|career objective|professional summary", 2.0),
+            en("education|academic qualifications?|technical skills|key skills|certifications|projects|internships?", 1.0),
+            en("linkedin|github\\.com|portfolio", 1.0),
+        ),
         DocType.TICKET to listOf(
             en("pnr|boarding pass|e-?ticket|electronic reservation slip|irctc|berth|seat\\s*no|departure|arrival", 2.5),
             en("passenger|journey|train\\s*no|flight", 1.0),

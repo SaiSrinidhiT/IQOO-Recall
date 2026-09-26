@@ -11,6 +11,10 @@ class IntentParser(private val llm: GenieXQwen, private val rules: RuleFallbackP
     suspend fun parse(query: String, today: LocalDate = LocalDate.now(), useLlm: Boolean = true): QueryIntent {
         val q = query.trim().take(MAX_QUERY_CHARS)
         val detected = rules.detectLanguage(q)
+        // Plain small talk ("hi", "thanks", "what can you do") needs no routing call: going straight to
+        // the chat reply saves a whole Qwen generation. Longer messages still get the model's judgement.
+        val ruled = Metrics.time("query.parse.rules") { rules.parse(q, today) }
+        if (ruled.kind == IntentKind.CHAT && q.split(Regex("\\s+")).size <= QUICK_CHAT_WORDS) return ruled
         if (useLlm && llm.ensureLoaded()) {
             val start = System.nanoTime()
             try {
@@ -25,11 +29,12 @@ class IntentParser(private val llm: GenieXQwen, private val rules: RuleFallbackP
                 Log.w(TAG, "LLM intent parse failed, using rules: ${e.javaClass.simpleName}")
             }
         }
-        return Metrics.time("query.parse.rules") { rules.parse(q, today) }
+        return ruled
     }
 
     private companion object {
         const val TAG = "IntentParser"
+        const val QUICK_CHAT_WORDS = 6
         const val MAX_QUERY_CHARS = 500
         const val TIMEOUT_MS = 12_000L
     }

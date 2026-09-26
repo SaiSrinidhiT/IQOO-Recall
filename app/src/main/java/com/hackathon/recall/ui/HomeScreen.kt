@@ -49,7 +49,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.hackathon.recall.R
-import com.hackathon.recall.data.type
+import com.hackathon.recall.data.effectiveType
 import com.hackathon.recall.i18n.docTypeName
 import com.hackathon.recall.i18n.templateName
 import com.hackathon.recall.ingest.IndexWorker
@@ -191,35 +191,7 @@ fun HomeScreen(nav: NavHostController) {
             }
 
             LazyColumn(Modifier.weight(1f)) {
-                // Ask Button
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).clickable { nav.navigate(Routes.results("")) },
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
-                    ) {
-                        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Box(Modifier.size(40.dp).background(Color.White.copy(alpha = 0.15f), CircleShape), contentAlignment = Alignment.Center) {
-                                Icon(Icons.Default.Search, contentDescription = null, tint = Color.White)
-                            }
-                            Spacer(Modifier.width(12.dp))
-                            Text("Ask for any document…", color = Color.White, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
-                            Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = Color.White.copy(alpha = 0.7f))
-                        }
-                    }
-                }
-                
-                // Chips
-                item {
-                    LazyRow(Modifier.padding(top = 12.dp, bottom = 16.dp), contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        val chips = listOf("Home loan documents", "Latest salary slip", "Health insurance", "Car policy expiry")
-                        items(chips) { chip ->
-                            Surface(shape = CircleShape, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), color = MaterialTheme.colorScheme.surface, onClick = { nav.navigate(Routes.results(chip)) }) {
-                                Text(chip, fontSize = 12.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
-                            }
-                        }
-                    }
-                }
+                item { Spacer(Modifier.height(4.dp)) }
 
                 // Stats Card
                 item {
@@ -247,7 +219,7 @@ fun HomeScreen(nav: NavHostController) {
 
                 // Categories
                 item {
-                    val byCategory = docs.groupingBy { DocCategory.of(it.docType) }.eachCount()
+                    val byCategory = docs.groupingBy { DocCategory.of(it) }.eachCount()
                     val identityCount = byCategory["identity"] ?: 0
                     val incomeCount = byCategory["income"] ?: 0
                     val healthCount = byCategory["health"] ?: 0
@@ -312,7 +284,7 @@ fun HomeScreen(nav: NavHostController) {
                                     Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
                                         Box(Modifier.size(10.dp).background(Color(0xFFF44336), CircleShape))
                                         Spacer(Modifier.width(12.dp))
-                                        Text(context.docTypeName(d.type()), modifier = Modifier.weight(1f), fontWeight = FontWeight.Medium, style = MaterialTheme.typography.bodySmall)
+                                        Text(context.docTypeName(d.effectiveType()), modifier = Modifier.weight(1f), fontWeight = FontWeight.Medium, style = MaterialTheme.typography.bodySmall)
                                         Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
                                 }
@@ -338,8 +310,17 @@ fun HomeScreen(nav: NavHostController) {
                 }
             }
 
-            // Bottom elements
+            // Bottom elements: quick-ask chips, the scan button, then the Ask bar as the lowest,
+            // most reachable element on screen (moved down from the top of the scrolling list).
             Column(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background)) {
+                LazyRow(Modifier.padding(bottom = 12.dp), contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    val chips = listOf("Home loan documents", "Latest salary slip", "Health insurance", "Car policy expiry")
+                    items(chips) { chip ->
+                        Surface(shape = CircleShape, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), color = MaterialTheme.colorScheme.surface, onClick = { nav.navigate(Routes.results(chip)) }) {
+                            Text(chip, fontSize = 12.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
+                        }
+                    }
+                }
                 Row(Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(Modifier.width(6.dp))
@@ -347,7 +328,7 @@ fun HomeScreen(nav: NavHostController) {
                 }
                 Button(
                     onClick = { nav.navigate(Routes.scan()) },
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 20.dp).height(48.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 12.dp).height(48.dp),
                     shape = CircleShape,
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onBackground),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
@@ -355,6 +336,20 @@ fun HomeScreen(nav: NavHostController) {
                     Icon(Icons.Default.AddCircle, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
                     Text("Scan a new document")
+                }
+                Card(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 20.dp).clickable { nav.navigate(Routes.results("")) },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.size(40.dp).background(Color.White.copy(alpha = 0.15f), CircleShape), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.Search, contentDescription = null, tint = Color.White)
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Text("Ask for any document…", color = Color.White, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
+                        Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = Color.White.copy(alpha = 0.7f))
+                    }
                 }
             }
         }

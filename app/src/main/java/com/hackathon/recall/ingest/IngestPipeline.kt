@@ -74,18 +74,32 @@ class IngestPipeline(
             val sha = sha256(src.bytes)
             repo.bySha(sha)?.let { return Outcome.ExactDuplicate(it) }
 
-            val pages: List<Bitmap> = if (src.mime == "application/pdf") ImageLoader.renderPdf(src.bytes) else listOf(ImageLoader.decode(src.bytes))
-            if (pages.isEmpty()) return Outcome.Failed("no pages")
-
-            // Gatekeeper (gallery only: camera scans and picked PDFs are documents by the user's choice).
-            val siglip = models.siglip
-            val imageVector = siglip?.embed(pages[0])
-            val verdict = imageVector?.let { models.gatekeeper?.judge(it) }
             val gated = src.kind == SourceKind.GALLERY && !src.forceDocument
+            val isPdf = src.mime == "application/pdf"
+
+            // Gatekeeper (gallery only: camera scans and picked PDFs are documents by the user's
+            // choice): embeds a small (GATE_DIM) bitmap instead of the full page. SigLIP2's own input
+            // is 224px regardless of what we hand it, so decoding at full resolution up front, as
+            // before, was wasted work on every photo — and for the ~90% the gate rejects, it was the
+            // *only* work needed, so most photos now skip the expensive full decode entirely.
+            val siglip = models.siglip
+            val gate = if (isPdf) null else run {
+                val gateBitmap = ImageLoader.decode(src.bytes, GATE_DIM)
+                val vec = siglip?.embed(gateBitmap)
+                val verdict = vec?.let { models.gatekeeper?.judge(it) }
+                gateBitmap.recycle()
+                vec to verdict
+            }
+            val imageVector = gate?.first
+            val verdict = gate?.second
             if (gated && verdict != null && !verdict.isDocument) {
                 val lenient = isScreenshotOrDocsFolder(src.relativePath) && verdict.uncertain
                 if (!lenient) return Outcome.NotADocument(verdict.topLabel, verdict.margin)
             }
+
+            val pages: List<Bitmap> = if (isPdf) ImageLoader.renderPdf(src.bytes) else listOf(ImageLoader.decode(src.bytes))
+            if (pages.isEmpty()) return Outcome.Failed("no pages")
+            try {
 
             val ocrPages: List<OcrResult> = pages.map { ocr.recognize(it) }
             val text = ocrPages.joinToString("\n") { it.text }
@@ -154,9 +168,11 @@ class IngestPipeline(
             val pageRows = ocrPages.mapIndexed { i, p -> PageRow(0, i, p.width, p.height, json.encodeToString(p.normalized())) }
             val id = repo.save(NewDocument(doc, entityRows, pageRows, chunks, imageVector, src.bytes))
             expiry?.let { reminders.scheduleFor(id, it) }
-            pages.forEach { it.recycle() }
             Metrics.record("ingest.document", (System.nanoTime() - start) / 1e6)
             return Outcome.Saved(id, cls.type, duplicateOf)
+            } finally {
+                pages.forEach { it.recycle() }
+            }
         } catch (e: ImageLoader.PasswordProtectedPdf) {
             return Outcome.Failed("password-protected PDF")
         } catch (t: Throwable) {
@@ -214,6 +230,8 @@ class IngestPipeline(
 
     companion object {
         private const val TAG = "IngestPipeline"
+        /** SigLIP2's own input is 224px; a bit of headroom avoids upscaling artifacts, nothing more. */
+        private const val GATE_DIM = 256
 
         fun sha256(bytes: ByteArray): String =
             MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }

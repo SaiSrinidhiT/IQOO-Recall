@@ -8,7 +8,10 @@ import java.time.LocalDate
 import java.time.format.DateTimeParseException
 
 enum class IntentKind(val code: String) {
-    FIND("find"), PACK("pack"), REMINDERS("reminders"), QUESTION("question");
+    FIND("find"), PACK("pack"), REMINDERS("reminders"), QUESTION("question"),
+
+    /** Greetings, thanks, help, small talk, off-topic questions: answered in words, never with a search. */
+    CHAT("chat");
 
     companion object {
         fun fromCode(v: String?): IntentKind? = entries.firstOrNull { it.code == v?.trim()?.lowercase() }
@@ -50,7 +53,7 @@ object IntentValidator {
     fun validate(raw: IntentJson, originalQuery: String, detectedLang: Lang): QueryIntent {
         val kind = IntentKind.fromCode(raw.intent)
             ?: throw IllegalArgumentException(
-                "\"intent\" must be one of find, pack, reminders, question (got ${raw.intent ?: "nothing"})",
+                "\"intent\" must be one of find, question, reminders, pack, chat (got ${raw.intent ?: "nothing"})",
             )
         val template = clean(raw.taskTemplate)?.lowercase()?.takeIf { it in TEMPLATES }
         val parsedTypes = raw.docTypes.orEmpty().map { it to DocType.parse(it) }
@@ -59,8 +62,14 @@ object IntentValidator {
         val d1 = date(raw.dateFrom)
         val d2 = date(raw.dateTo)
         val (from, to) = if (d1 != null && d2 != null && d1.isAfter(d2)) d2 to d1 else d1 to d2
+        val resolved = when {
+            kind == IntentKind.PACK && template == null && docTypes.isEmpty() -> IntentKind.FIND
+            // A reply that says "chat" but names a document contradicts itself; the document wins.
+            kind == IntentKind.CHAT && (docTypes.isNotEmpty() || template != null) -> IntentKind.FIND
+            else -> kind
+        }
         return QueryIntent(
-            kind = if (kind == IntentKind.PACK && template == null && docTypes.isEmpty()) IntentKind.FIND else kind,
+            kind = resolved,
             template = template,
             docTypes = docTypes,
             queryEn = clean(raw.queryEn) ?: originalQuery,

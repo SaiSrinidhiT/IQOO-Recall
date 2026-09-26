@@ -12,6 +12,8 @@ data class Lexicon(
     @SerialName("intent_words") val intentWords: Map<String, List<String>>,
     @SerialName("language_hints") val languageHints: Map<String, Map<String, Double>>,
     @SerialName("relative_dates") val relativeDates: Map<String, List<String>>,
+    /** Small-talk vocabulary by kind (greeting, thanks, help, bye): routes a message to chat, not search. */
+    @SerialName("chat_words") val chatWords: Map<String, List<String>> = emptyMap(),
 ) {
     companion object {
         fun parse(json: String): Lexicon = LlmJson.json.decodeFromString(serializer(), json)

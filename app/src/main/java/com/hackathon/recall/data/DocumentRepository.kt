@@ -2,6 +2,7 @@ package com.hackathon.recall.data
 
 import androidx.room.withTransaction
 import com.hackathon.recall.actions.DocSummary
+import com.hackathon.recall.extract.OwnerNameExtractor
 import com.hackathon.recall.ml.VectorMath
 import com.hackathon.recall.model.DocType
 import com.hackathon.recall.model.DocTypeSource
@@ -89,6 +90,32 @@ class DocumentRepository(
         )
     }
 
+    /** Manually tags whose document this is, when OCR found no name or found the wrong one. */
+    suspend fun setOwner(id: Long, owner: String?) {
+        val doc = docs.byId(id) ?: return
+        docs.update(doc.copy(ownerName = owner?.trim()?.takeIf { it.isNotEmpty() }))
+    }
+
+    suspend fun clearOwnerNames(types: List<String>): Int = docs.clearOwnerNames(types)
+
+    /**
+     * Re-runs owner extraction over each document's stored OCR text, so a fix to [OwnerNameExtractor]
+     * corrects names already in the vault without rescanning the gallery. Documents in [skipIds] were
+     * tagged by hand and are left alone.
+     */
+    suspend fun reextractOwners(skipIds: Set<Long>): Int {
+        var changed = 0
+        for (doc in docs.all()) {
+            if (doc.id in skipIds) continue
+            val owner = OwnerNameExtractor.extract(doc.ocrText.lines(), doc.type())
+            if (owner != doc.ownerName) {
+                docs.update(doc.copy(ownerName = owner))
+                changed++
+            }
+        }
+        return changed
+    }
+
     suspend fun setExpiry(id: Long, expiry: LocalDate?, source: String) {
         val doc = docs.byId(id) ?: return
         docs.update(doc.copy(expiryOn = expiry?.toString(), expirySource = source, needsLlm = doc.needsLlm and NEEDS_EXPIRY.inv()))
@@ -117,11 +144,34 @@ class DocumentRepository(
     }
 }
 
+/** The type the classifier detected, however unsure. Only the document screen should show this raw guess. */
 fun DocumentEntity.type(): DocType = DocType.parse(docType) ?: DocType.OTHER_DOCUMENT
+
+/** A detected type counts only at or above this confidence, or once the user confirms it. */
+const val MIN_TYPE_CONFIDENCE = 0.8f
+
+fun DocumentEntity.isTypeConfident(): Boolean = isUserConfirmed || docTypeConfidence >= MIN_TYPE_CONFIDENCE
+
+/**
+ * The type every grouping, filter, checklist header and list label uses: the detected type when
+ * confident, otherwise OTHER_DOCUMENT, so a 55% "loan sanction" guess never appears under Loan sanction.
+ */
+fun DocumentEntity.effectiveType(): DocType = if (isTypeConfident()) type() else DocType.OTHER_DOCUMENT
+
+/**
+ * The title to show. Stored titles lead with the detected type ("Loan sanction letter or EMI schedule ·
+ * 12 Mar 2026"), which would tag an unsure document with its guess; for those the label is dropped.
+ */
+fun DocumentEntity.displayTitle(): String {
+    if (isTypeConfident()) return titleEn
+    val label = type().labelEn
+    return if (titleEn.startsWith(label)) titleEn.removePrefix(label).trim().removePrefix("·").trim() else titleEn
+}
 
 fun DocumentEntity.toSummary(): DocSummary = DocSummary(
     id = id,
-    type = type(),
+    // Checklists match items on this, so an unsure guess can't fill a "Loan sanction / EMI" slot.
+    type = effectiveType(),
     issuedOn = issuedOn?.let(LocalDate::parse),
     capturedOn = Instant.ofEpochMilli(capturedAt).atZone(ZoneId.systemDefault()).toLocalDate(),
     expiryOn = expiryOn?.let(LocalDate::parse),

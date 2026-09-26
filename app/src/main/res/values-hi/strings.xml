@@ -184,5 +184,12 @@
     <string name="doc_PAYMENT_SCREENSHOT">पेमेंट स्क्रीनशॉट</string>
     <string name="doc_WARRANTY">वारंटी कार्ड</string>
     <string name="doc_TICKET">टिकट</string>
+    <string name="doc_RESUME">बायोडाटा / रिज़्यूमे</string>
     <string name="doc_OTHER_DOCUMENT">अन्य दस्तावेज़</string>
+    <!-- Chat replies used when Qwen is unavailable -->
+    <string name="chat_reply_greeting">नमस्ते! मैं आपके दस्तावेज़ ढूँढ सकता हूँ, उनसे जुड़े सवालों के जवाब दे सकता हूँ और उनकी अवधि खत्म होने से पहले याद दिला सकता हूँ। पूछकर देखें: \"मेरा PAN कार्ड दिखाओ\"।</string>
+    <string name="chat_reply_thanks">आपका स्वागत है! दस्तावेज़ों से जुड़ी और कोई मदद चाहिए?</string>
+    <string name="chat_reply_help">मैं आपके सेव किए दस्तावेज़ ढूँढता हूँ, उनसे सवालों के जवाब देता हूँ, आधार छिपाकर PDF शेयर करता हूँ और बताता हूँ कि क्या खत्म होने वाला है।</string>
+    <string name="chat_reply_bye">अलविदा! आपके दस्तावेज़ इसी फ़ोन पर सुरक्षित हैं।</string>
+    <string name="chat_reply_offtopic">मैं सिर्फ़ इस फ़ोन में सेव आपके दस्तावेज़ों में मदद कर सकता हूँ। पूछकर देखें: \"मेरा आधार दिखाओ\"।</string>
 </resources>

@@ -12,6 +12,7 @@
     "LIFE_INSURANCE": ["life insurance", "lic", "term insurance", "term plan", "jeevan bima", "जीवन बीमा", "जीवन बीमा पॉलिसी", "జీవిత బీమా", "ఎల్ఐసి"],
     "SALARY_SLIP": ["salary", "salary slip", "salary slips", "payslip", "pay slip", "payslips", "jeetham", "jeetam", "jitam", "jeeta", "vetan", "vethanam", "tankha", "tankhwa", "tanakha", "वेतन", "वेतन पर्ची", "तनख्वाह", "सैलरी", "సాలరీ", "శాలరీ", "జీతం", "జీతం స్లిప్", "వేతనం"],
     "BANK_STATEMENT": ["bank statement", "statement", "account statement", "passbook", "bank", "बैंक स्टेटमेंट", "खाता विवरण", "बैंक", "పాస్‌బుక్", "బ్యాంక్ స్టేట్‌మెంట్", "బ్యాంకు", "బ్యాంక్"],
+    "RESUME": ["resume", "résumé", "cv", "curriculum vitae", "biodata", "bio data", "बायोडाटा", "रिज़्यूमे", "रिज्यूमे", "బయోడేటా", "రెజ్యూమే", "రెజ్యూమ్"],
     "EMPLOYMENT_LETTER": ["offer letter", "appointment letter", "employment letter", "experience letter", "job letter", "company letter", "नियुक्ति पत्र", "ऑफर लेटर", "ఉద్యోగ లేఖ", "ఆఫర్ లెటర్", "అపాయింట్‌మెంట్ లెటర్"],
     "ITR_FORM16": ["itr", "form 16", "form16", "income tax return", "tax return", "आयकर रिटर्न", "फॉर्म 16", "ఐటీఆర్", "ఫారం 16", "ఆదాయపు పన్ను రిటర్న్"],
     "RENT_AGREEMENT": ["rent agreement", "rental agreement", "lease", "kiraya", "kirayanama", "adde", "किराया", "किरायानामा", "రెంట్ అగ్రిమెంట్", "అద్దె ఒప్పందం", "అద్దె"],
@@ -48,5 +49,11 @@
     "last_6_months": ["last six months", "last 6 months", "past six months", "past 6 months", "pichle chhe mahine", "pichle 6 mahine", "gata aaru nelalu", "gata 6 nelalu", "पिछले छह महीने", "पिछले 6 महीने", "గత ఆరు నెలలు", "గత 6 నెలలు"],
     "this_year": ["this year", "is saal", "ee samvatsaram", "इस साल", "इस वर्ष", "ఈ సంవత్సరం", "ఈ ఏడాది"],
     "last_year": ["last year", "pichle saal", "gata samvatsaram", "poyina edadi", "पिछले साल", "पिछला साल", "గత సంవత్సరం", "పోయిన ఏడాది"]
+  },
+  "chat_words": {
+    "greeting": ["hi", "hii", "hiii", "hello", "helo", "hey", "heya", "hola", "yo", "good morning", "good afternoon", "good evening", "good night", "namaste", "namaskar", "namaskaram", "namasthe", "vanakkam", "how are you", "how r u", "whats up", "what's up", "sup", "kaise ho", "kaisa hai", "kya haal", "ela unnav", "ela unnavu", "ela unnaru", "bagunnava", "नमस्ते", "नमस्कार", "कैसे हो", "క్షేమమా", "హాయ్", "హలో", "నమస్కారం", "ఎలా ఉన్నారు", "ఎలా ఉన్నావు"],
+    "thanks": ["thanks", "thank you", "thankyou", "thanku", "thx", "ty", "tq", "ok", "okay", "okk", "cool", "great", "nice", "super", "awesome", "perfect", "dhanyavad", "dhanyavaad", "shukriya", "dhanyavadalu", "धन्यवाद", "शुक्रिया", "ధన్యవాదాలు", "థాంక్స్"],
+    "help": ["help", "what can you do", "who are you", "what are you", "how does this work", "how to use", "how do i use", "features", "madad", "sahayam", "मदद", "सहायता", "సహాయం"],
+    "bye": ["bye", "goodbye", "good bye", "see you", "tata", "alvida", "बाय", "अलविदा", "బై", "సెలవు"]
   }
 }

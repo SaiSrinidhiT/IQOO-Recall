@@ -35,7 +35,8 @@ data class LlmResult(val text: String, val totalMs: Long, val ttftMs: Double, va
 interface LlmClient {
     val state: StateFlow<LlmState>
     suspend fun ensureLoaded(): Boolean
-    suspend fun complete(system: String, user: String, maxTokens: Int = 256): LlmResult
+    /** [onToken] receives each generated piece as it arrives, for streaming a reply into the UI. */
+    suspend fun complete(system: String, user: String, maxTokens: Int = 256, onToken: ((String) -> Unit)? = null): LlmResult
     fun unload()
 }
 
@@ -56,11 +57,20 @@ class GenieXQwen(private val context: Context, private val files: ModelFiles) : 
 
     private suspend fun loadLocked(): Boolean {
         if (llm != null) return true
+        // The first load imports the pushed bundle into the app's internal storage, so a model
+        // counts as available when either copy exists: the external one can be wiped without it.
+        val imported = withContext(Dispatchers.IO) {
+            GenieXSdk.getInstance().init(context)
+            listOf(files.qwen, files.qwenFallback).filterTo(HashSet()) { ModelManagerWrapper.getPaths(key(it)) != null }
+        }
+        fun available(dir: File) = dir.exists() || dir in imported
         val candidates = buildList {
-            if (!usingFallback && files.qwen.exists()) add(files.qwen)
-            if (files.qwenFallback.exists()) add(files.qwenFallback)
+            if (!usingFallback && available(files.qwen)) add(files.qwen)
+            if (available(files.qwenFallback)) add(files.qwenFallback)
         }
         if (candidates.isEmpty()) {
+            // Logged, not silent: without this, chat quietly drops to the rule parser.
+            if (_state.value !is LlmState.Missing) Log.w(TAG, "no Qwen bundle pushed or imported; chat uses the rule fallback")
             _state.value = LlmState.Missing(files.qwen.absolutePath)
             return false
         }
@@ -82,9 +92,11 @@ class GenieXQwen(private val context: Context, private val files: ModelFiles) : 
         return false
     }
 
+    private fun key(dir: File) = "local/${dir.name}"
+
     private suspend fun load(dir: File): LlmWrapper {
         GenieXSdk.getInstance().init(context)
-        val key = "local/${dir.name}"
+        val key = key(dir)
         var paths = ModelManagerWrapper.getPaths(key)
         if (paths == null) {
             var error: String? = null
@@ -99,7 +111,9 @@ class GenieXQwen(private val context: Context, private val files: ModelFiles) : 
                     model_name = key,
                     model_path = paths.model_path,
                     tokenizer_path = null,
-                    config = ModelConfig(),
+                    // The qairt plugin rejects any non-zero n_ctx ("--nctx is not supported"); the
+                    // context size comes from the bundle's genie_config.json. ModelConfig() defaults it to 2048.
+                    config = ModelConfig().apply { nCtx = 0 },
                     runtime_id = paths.runtime_id,
                     compute_unit = null,
                 ),
@@ -108,9 +122,14 @@ class GenieXQwen(private val context: Context, private val files: ModelFiles) : 
             .getOrThrow()
     }
 
-    override suspend fun complete(system: String, user: String, maxTokens: Int): LlmResult = mutex.withLock {
+    override suspend fun complete(system: String, user: String, maxTokens: Int, onToken: ((String) -> Unit)?): LlmResult = mutex.withLock {
         if (!loadLocked()) throw IllegalStateException("LLM unavailable: ${_state.value}")
         val wrapper = llm!!
+        // The engine keeps one running dialog: without a reset every call is appended to the last,
+        // the answer step imitates the routing call before it, and once the 4096-token context fills
+        // every generation returns zero tokens. Each call here is a standalone job, so start clean.
+        val rc = wrapper.reset()
+        if (rc != 0) Log.w(TAG, "reset returned $rc")
         val start = System.nanoTime()
         val messages = arrayOf(ChatMessage("system", system), ChatMessage("user", user))
         val prompt = wrapper.applyChatTemplate(messages, null, false).getOrThrow().formattedText
@@ -122,7 +141,10 @@ class GenieXQwen(private val context: Context, private val files: ModelFiles) : 
         var tokens = 0L
         wrapper.generateStreamFlow(prompt, config).collect { r ->
             when (r) {
-                is LlmStreamResult.Token -> text.append(r.text)
+                is LlmStreamResult.Token -> {
+                    text.append(r.text)
+                    onToken?.invoke(r.text)
+                }
                 is LlmStreamResult.Completed -> {
                     ttft = r.profile.ttftMs
                     tps = r.profile.decodingSpeed
@@ -132,6 +154,7 @@ class GenieXQwen(private val context: Context, private val files: ModelFiles) : 
             }
         }
         failure?.let { throw it }
+        if (text.isBlank()) Log.w(TAG, "generation returned no text")
         val ms = (System.nanoTime() - start) / 1_000_000
         Metrics.record("qwen.generate", ms.toDouble())
         LlmResult(text.toString(), ms, ttft, tps, tokens)

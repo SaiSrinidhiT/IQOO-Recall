@@ -52,6 +52,10 @@ interface DocumentDao {
 
     @Query("SELECT * FROM documents WHERE needs_llm != 0")
     suspend fun needingLlm(): List<DocumentEntity>
+
+    /** One-time cleanup (AppContainer.start): owner names OwnerNameExtractor should never have set on these types. */
+    @Query("UPDATE documents SET owner_name = NULL WHERE owner_name IS NOT NULL AND doc_type IN (:types)")
+    suspend fun clearOwnerNames(types: List<String>): Int
 }
 
 @Dao
