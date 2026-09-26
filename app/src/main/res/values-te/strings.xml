@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tagline">వ్యక్తిగత పత్రాల సహాయకుడు</string>
+    <string name="device_label">పరికరం</string>
+    <string name="android_label">ఆండ్రాయిడ్</string>
+    <string name="offline_ok">ఆఫ్‌లైన్ బిల్డ్: ఇంటర్నెట్ అనుమతి లేదు</string>
+    <string name="offline_violation">హెచ్చరిక: ఈ బిల్డ్ ఇంటర్నెట్ అనుమతి అడుగుతోంది</string>
+
+    <string name="back">వెనక్కి</string>
+    <string name="cancel">రద్దు చేయి</string>
+    <string name="ok">సరే</string>
+    <string name="save">సేవ్ చేయి</string>
+    <string name="loading">లోడ్ అవుతోంది…</string>
+    <string name="opening_vault">మీ ఎన్‌క్రిప్ట్ చేసిన వాల్ట్ తెరుచుకుంటోంది…</string>
+
+    <string name="lock_title">మీ వాల్ట్ లాక్ అయి ఉంది</string>
+    <string name="lock_subtitle">వేలిముద్ర, ముఖం లేదా స్క్రీన్ లాక్‌తో అన్‌లాక్ చేయండి.</string>
+    <string name="action_unlock">అన్‌లాక్ చేయి</string>
+    <string name="biometric_title">iQOO Recall అన్‌లాక్ చేయండి</string>
+    <string name="lock_no_credential">స్క్రీన్ లాక్ సెట్ చేయలేదు, కాబట్టి వాల్ట్‌ను లాక్ చేయలేము. మీ పత్రాలను రక్షించడానికి సెట్టింగ్స్‌లో స్క్రీన్ లాక్ సెట్ చేయండి.</string>
+    <string name="action_continue">కొనసాగించు</string>
+
+    <string name="ask_hint">తెలుగు, English లేదా हिंदी లో అడగండి</string>
+    <string name="action_ask">అడుగు</string>
+    <string name="action_voice">మాట్లాడు</string>
+    <string name="voice_listening">వింటోంది…</string>
+    <string name="voice_unavailable">ఈ భాషకు ఆఫ్‌లైన్ వాయిస్ ఇన్‌పుట్ అందుబాటులో లేదు. టైప్ చేసి అడగవచ్చు.</string>
+    <string name="emergency_button">అత్యవసరం</string>
+    <string name="packs_title">పత్రాలు సిద్ధం చేయండి</string>
+    <string name="index_title">ఇండెక్స్ అవుతోంది</string>
+    <string name="index_progress">%1$d పూర్తి · %2$d మిగిలినవి · సుమారు %3$d సెకన్లు</string>
+    <string name="index_idle">మీ వాల్ట్‌లో %1$d పత్రాలు</string>
+    <string name="index_partial_access">యాప్‌తో కొన్ని ఫోటోలు మాత్రమే పంచుకున్నారు, కాబట్టి ఇండెక్స్ అసంపూర్ణంగా ఉంది.</string>
+    <string name="action_change_access">యాక్సెస్ మార్చు</string>
+    <string name="grant_photos">యాప్ మీ పత్రాలను కనుగొనడానికి ఫోటో యాక్సెస్ ఇవ్వండి.</string>
+    <string name="action_grant">అనుమతించు</string>
+    <string name="expiring_title">గడువు తేదీలు</string>
+    <string name="expired">గడువు ముగిసింది</string>
+    <string name="expires_on">%1$s న గడువు</string>
+    <string name="recent_title">ఇటీవలి పత్రాలు</string>
+    <string name="action_scan">స్కాన్ చేయి</string>
+    <string name="action_add_pdf">PDF జోడించు</string>
+    <string name="action_vault">వాల్ట్</string>
+    <string name="action_benchmark">బెంచ్‌మార్క్</string>
+    <string name="action_settings">సెట్టింగ్స్</string>
+    <string name="duplicate_banner">మీరు ఈ %1$s ను ఇప్పటికే %2$s న సేవ్ చేశారు.</string>
+    <string name="action_keep_both">రెండూ ఉంచు</string>
+    <string name="action_replace">మార్చు</string>
+    <string name="empty_vault">ఇంకా పత్రాలు లేవు. ఫోటో యాక్సెస్ ఇవ్వండి, పత్రాన్ని స్కాన్ చేయండి లేదా PDF జోడించండి.</string>
+
+    <string name="results_title">ఫలితాలు</string>
+    <string name="results_sources">మూల పత్రాలు</string>
+    <string name="results_mode_llm">మీ పత్రాల ఆధారంగా Qwen రాసిన జవాబు</string>
+    <string name="results_mode_rules">సహాయకుడు నియమాల మోడ్‌లో ఉన్నాడు (భాషా మోడల్ లోడ్ కాలేదు)</string>
+    <string name="answer_nothing_found">సరిపోయే పత్రం ఏదీ దొరకలేదు.</string>
+    <plurals name="answer_found_docs">
+        <item quantity="one">%1$d పత్రం దొరికింది: %2$s</item>
+        <item quantity="other">%1$d పత్రాలు దొరికాయి: %2$s</item>
+    </plurals>
+    <string name="reminders_title">గడువు తేదీ ఉన్న పత్రాలు</string>
+    <string name="no_expiry_docs">సేవ్ చేసిన ఏ పత్రానికీ గడువు తేదీ లేదు.</string>
+
+    <string name="status_found">దొరికింది</string>
+    <string name="status_missing">లేదు</string>
+    <string name="status_count">%2$d లో %1$d</string>
+    <string name="status_optional">ఐచ్ఛికం</string>
+    <string name="checklist_complete">అవసరమైన పత్రాలన్నీ సిద్ధంగా ఉన్నాయి.</string>
+    <string name="checklist_incomplete">కొన్ని అవసరమైన పత్రాలు లేవు.</string>
+    <string name="action_build_pdf">మాస్క్ చేసిన PDF తయారు చేసి షేర్ చేయి</string>
+    <string name="pack_building">ఆధార్ నంబర్లు దాచి PDF తయారవుతోంది…</string>
+    <string name="pack_blocked">“%1$s” షేర్ ఆపబడింది: %2$s</string>
+    <string name="pack_failed">PDF తయారు కాలేదు: %1$s</string>
+    <string name="pack_cover_generated">iQOO Recall ద్వారా %1$s న సిద్ధం చేయబడింది</string>
+    <string name="pack_cover_masking_note">ఆధార్ నంబర్లు దాచబడ్డాయి: చివరి 4 అంకెలు మాత్రమే కనిపిస్తాయి. QR కోడ్‌లు దాచబడ్డాయి.</string>
+    <string name="ignored_too_old">పాత పత్రాలు లెక్కించలేదు (ఈ జాబితాకు చాలా పాతవి).</string>
+    <string name="ignored_expired">గడువు ముగిసిన ఒక పత్రం లెక్కించలేదు.</string>
+    <string name="ignored_same_month">ఒకే నెల రెండు పత్రాలు ఒకటిగా లెక్కించబడతాయి.</string>
+
+    <string name="doc_title">పత్రం</string>
+    <string name="field_type">రకం</string>
+    <string name="field_expiry">గడువు</string>
+    <string name="field_issued">జారీ</string>
+    <string name="field_owner">పేరు</string>
+    <string name="field_source">మూలం</string>
+    <string name="field_source_missing">అసలు ఫైల్ గ్యాలరీ నుండి తొలగించబడింది; ఎన్‌క్రిప్ట్ చేసిన కాపీ ఉంచబడింది.</string>
+    <string name="field_entities">దొరికిన వివరాలు</string>
+    <string name="field_confidence">%1$s ద్వారా గుర్తించబడింది (%2$d%%)</string>
+    <string name="action_change_type">రకం మార్చు</string>
+    <string name="action_edit_expiry">గడువు తేదీ మార్చు</string>
+    <string name="expiry_hint">YYYY-MM-DD, లేదా ఖాళీగా వదలండి</string>
+    <string name="action_delete">తొలగించు</string>
+    <string name="confirm_delete">ఈ పత్రాన్ని మరియు దాని ఎన్‌క్రిప్ట్ కాపీని తొలగించాలా?</string>
+    <string name="action_test_reminder">1 నిమిషంలో టెస్ట్ రిమైండర్</string>
+    <string name="test_reminder_set">టెస్ట్ రిమైండర్ ఒక నిమిషం తర్వాతకు సెట్ చేయబడింది.</string>
+
+    <string name="vault_title">వాల్ట్</string>
+    <string name="filter_all">అన్నీ</string>
+    <string name="filter_person">వ్యక్తి</string>
+
+    <string name="camera_title">పత్రాన్ని స్కాన్ చేయండి</string>
+    <string name="camera_expected">స్కాన్: %1$s</string>
+    <string name="action_capture">ఫోటో తీయి</string>
+    <string name="scan_processing">పత్రం చదువుతోంది…</string>
+    <string name="scan_saved">%1$s గా సేవ్ చేయబడింది.</string>
+    <string name="scan_duplicate">ఇప్పటికే %1$s న సేవ్ చేయబడింది.</string>
+    <string name="scan_failed">ఈ స్కాన్ చదవలేకపోయాం: %1$s</string>
+    <string name="scan_not_document">ఇది పత్రంలా కనిపించడం లేదు.</string>
+    <string name="camera_permission_needed">పత్రాలు స్కాన్ చేయడానికి కెమెరా అనుమతి అవసరం.</string>
+
+    <string name="emergency_title">అత్యవసర ఆరోగ్య ప్యాక్</string>
+    <string name="emergency_read_aloud">చదివి వినిపించు</string>
+    <string name="emergency_stop">ఆపు</string>
+    <string name="emergency_tts_fallback">%1$s వాయిస్ ఇన్‌స్టాల్ కాలేదు, కాబట్టి ఇంగ్లీష్‌లో చదివాం.</string>
+    <string name="emergency_tts_unavailable">ఈ ఫోన్‌లో చదివి వినిపించే సౌకర్యం అందుబాటులో లేదు.</string>
+    <string name="emergency_open_vault">పూర్తి వాల్ట్ తెరువు</string>
+    <string name="emergency_locked_note">అన్‌లాక్ చేయకుండా చూపబడింది. ఈ ఆరోగ్య ప్యాక్ మాత్రమే కనిపిస్తుంది; ఆధార్ దాచబడింది.</string>
+    <string name="emergency_missing_item">%1$s: ఇంకా సేవ్ చేయలేదు.</string>
+    <string name="emergency_item_valid_till">%1$s, %2$s వరకు చెల్లుబాటు.</string>
+    <string name="emergency_item_with_id">%1$s, నంబర్ చివరి అంకెలు %2$s.</string>
+    <string name="emergency_item">%1$s: %2$s.</string>
+    <string name="tile_label">అత్యవసర ప్యాక్</string>
+
+    <string name="models_title">మోడల్స్</string>
+    <string name="models_missing">పరికరంలో కొన్ని మోడల్స్ లేవు లేదా పాడయ్యాయి.</string>
+    <string name="models_push_hint">వీటిని scripts/push_models.sh తో పుష్ చేయండి. ఆశించిన స్థానం:</string>
+    <string name="action_continue_fallback">ఇవి లేకుండా కొనసాగించు</string>
+    <string name="model_state_missing">లేదు</string>
+    <string name="model_state_loading">లోడ్ అవుతోంది…</string>
+    <string name="model_state_failed">విఫలమైంది: %1$s</string>
+    <string name="model_state_ready">%1$s · %2$d ms లో లోడ్</string>
+    <string name="model_state_not_loaded">లోడ్ కాలేదు</string>
+    <string name="action_load_llm">Qwen లోడ్ చేయి</string>
+    <string name="bench_title">బెంచ్‌మార్క్</string>
+    <string name="bench_models">మోడల్స్ మరియు కంప్యూట్ యూనిట్లు</string>
+    <string name="bench_latency">కొలిచిన ఆలస్యం (ms)</string>
+    <string name="bench_index">ఇండెక్స్</string>
+    <string name="bench_run">బెంచ్‌మార్క్ నడుపు</string>
+    <string name="bench_running">నడుస్తోంది…</string>
+    <string name="bench_run_eval">EVAL ప్రశ్నలు నడుపు</string>
+    <string name="bench_no_data">ఇంకా కొలతలు లేవు.</string>
+
+    <string name="settings_title">సెట్టింగ్స్</string>
+    <string name="perm_photos">ఫోటోలు</string>
+    <string name="perm_notifications">నోటిఫికేషన్లు</string>
+    <string name="perm_exact_alarms">ఖచ్చితమైన రిమైండర్ అలారాలు</string>
+    <string name="perm_camera">కెమెరా</string>
+    <string name="perm_mic">మైక్రోఫోన్</string>
+    <string name="perm_granted">అనుమతించబడింది</string>
+    <string name="perm_partial">కొన్ని ఫోటోలు మాత్రమే</string>
+    <string name="perm_denied">అనుమతి లేదు</string>
+    <string name="voice_langs">ఆఫ్‌లైన్ వాయిస్ భాషలు</string>
+    <string name="tts_langs">చదివి వినిపించే వాయిస్‌లు</string>
+    <string name="lang_available">%1$s: అందుబాటులో ఉంది</string>
+    <string name="lang_unavailable">%1$s: ఇన్‌స్టాల్ కాలేదు</string>
+    <string name="skipped_images">పత్రాలు కావని వదిలేసిన చిత్రాలు</string>
+    <string name="action_mark_document">పత్రంగా గుర్తించు</string>
+    <string name="allow_screen_capture">స్క్రీన్‌షాట్లు, స్క్రీన్ మిర్రరింగ్ అనుమతించు (డెమో కోసం)</string>
+    <string name="app_language">యాప్ భాష</string>
+
+    <string name="channel_expiry">గడువు రిమైండర్లు</string>
+    <string name="channel_indexing">ఇండెక్సింగ్</string>
+    <plurals name="expires_in_days">
+        <item quantity="one">%1$s గడువు %2$d రోజులో ముగుస్తుంది</item>
+        <item quantity="other">%1$s గడువు %2$d రోజుల్లో ముగుస్తుంది</item>
+    </plurals>
+    <string name="reminder_body">రెన్యూవల్ జాబితా తెరవడానికి నొక్కండి.</string>
+    <string name="reminder_test_title">టెస్ట్ రిమైండర్: %1$s</string>
+
+    <string name="template_home_loan">హోమ్ లోన్</string>
+    <string name="template_health_insurance_claim">ఆరోగ్య బీమా క్లెయిమ్</string>
+    <string name="template_vehicle_insurance_renewal">వాహన బీమా రెన్యూవల్</string>
+    <string name="template_emergency_health">అత్యవసర ఆరోగ్య ప్యాక్</string>
+    <string name="template_passport">పాస్‌పోర్ట్ దరఖాస్తు</string>
+    <string name="template_health_insurance_renewal">ఆరోగ్య బీమా రెన్యూవల్</string>
+    <string name="template_driving_licence_renewal">డ్రైవింగ్ లైసెన్స్ రెన్యూవల్</string>
+    <string name="template_life_insurance_renewal">జీవిత బీమా రెన్యూవల్</string>
+    <string name="template_renewal_generic">రెన్యూవల్</string>
+
+    <string name="doc_AADHAAR">ఆధార్ కార్డ్</string>
+    <string name="doc_PAN">పాన్ కార్డ్</string>
+    <string name="doc_DRIVING_LICENCE">డ్రైవింగ్ లైసెన్స్</string>
+    <string name="doc_VEHICLE_RC">వాహన ఆర్‌సీ</string>
+    <string name="doc_PASSPORT">పాస్‌పోర్ట్</string>
+    <string name="doc_VOTER_ID">ఓటర్ ఐడీ</string>
+    <string name="doc_HEALTH_ID_ABHA">ఆభా హెల్త్ ఐడీ</string>
+    <string name="doc_HEALTH_INSURANCE">ఆరోగ్య బీమా</string>
+    <string name="doc_VEHICLE_INSURANCE">వాహన బీమా</string>
+    <string name="doc_LIFE_INSURANCE">జీవిత బీమా</string>
+    <string name="doc_SALARY_SLIP">జీతం స్లిప్</string>
+    <string name="doc_BANK_STATEMENT">బ్యాంక్ స్టేట్‌మెంట్</string>
+    <string name="doc_EMPLOYMENT_LETTER">ఉద్యోగ లేఖ</string>
+    <string name="doc_ITR_FORM16">ఐటీఆర్ / ఫారం 16</string>
+    <string name="doc_RENT_AGREEMENT">అద్దె ఒప్పందం</string>
+    <string name="doc_PROPERTY_PAPER">ఆస్తి పత్రాలు</string>
+    <string name="doc_LOAN_SANCTION_EMI">లోన్ మంజూరు / ఈఎంఐ</string>
+    <string name="doc_MEDICAL_REPORT">వైద్య నివేదిక</string>
+    <string name="doc_HOSPITAL_BILL">ఆసుపత్రి బిల్లు</string>
+    <string name="doc_PRESCRIPTION">మందుల చీటీ</string>
+    <string name="doc_UTILITY_BILL">యుటిలిటీ బిల్లు</string>
+    <string name="doc_RECEIPT_INVOICE">రశీదు / ఇన్‌వాయిస్</string>
+    <string name="doc_PAYMENT_SCREENSHOT">చెల్లింపు స్క్రీన్‌షాట్</string>
+    <string name="doc_WARRANTY">వారంటీ కార్డ్</string>
+    <string name="doc_TICKET">టికెట్</string>
+    <string name="doc_OTHER_DOCUMENT">ఇతర పత్రం</string>
+</resources>

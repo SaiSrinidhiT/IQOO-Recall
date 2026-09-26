@@ -1,0 +1,7 @@
+{
+  "siglip": {"input_range": "zero_one"},
+  "gatekeeper": {"margin": 0.0, "uncertain_band": 0.02, "near_dup_cosine": 0.95, "near_dup_jaccard": 0.8},
+  "search": {"min_cosine": 0.35},
+  "calibrated": true,
+  "calibration_note": "Gatekeeper margin from the 16-image seed set with Hugging Face reference embeddings (google/siglip2-base-patch16-224): documents >= +0.031, non-documents <= -0.028, so 0.0 with a 0.02 band separates all 16. Re-check with on-device embeddings; the seed set is small and synthetic."
+}

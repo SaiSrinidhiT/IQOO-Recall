@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">iQOO Recall</string>
+    <string name="tagline">Private paperwork assistant</string>
+    <string name="device_label">Device</string>
+    <string name="android_label">Android</string>
+    <string name="offline_ok">Offline build: no internet permission</string>
+    <string name="offline_violation">Warning: this build requests internet permission</string>
+
+    <!-- Common -->
+    <string name="back">Back</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="save">Save</string>
+    <string name="loading">Loading…</string>
+    <string name="opening_vault">Opening your encrypted vault…</string>
+
+    <!-- Lock -->
+    <string name="lock_title">Your vault is locked</string>
+    <string name="lock_subtitle">Unlock with your fingerprint, face or screen lock.</string>
+    <string name="action_unlock">Unlock</string>
+    <string name="biometric_title">Unlock iQOO Recall</string>
+    <string name="lock_no_credential">No screen lock is set, so the vault can\'t be locked. Set one in Settings to protect your documents.</string>
+    <string name="action_continue">Continue</string>
+
+    <!-- Home -->
+    <string name="ask_hint">Ask in English, తెలుగు or हिंदी</string>
+    <string name="action_ask">Ask</string>
+    <string name="action_voice">Speak</string>
+    <string name="voice_listening">Listening…</string>
+    <string name="voice_unavailable">Voice input isn\'t available offline for this language. Typing still works.</string>
+    <string name="emergency_button">Emergency</string>
+    <string name="packs_title">Get documents ready</string>
+    <string name="index_title">Indexing</string>
+    <string name="index_progress">%1$d done · %2$d left · about %3$d s</string>
+    <string name="index_idle">%1$d documents in your vault</string>
+    <string name="index_partial_access">Only some photos are shared with the app, so the index is incomplete.</string>
+    <string name="action_change_access">Change access</string>
+    <string name="grant_photos">Allow photo access so the app can find your documents.</string>
+    <string name="action_grant">Allow</string>
+    <string name="expiring_title">Expiry dates</string>
+    <string name="expired">Expired</string>
+    <string name="expires_on">Expires %1$s</string>
+    <string name="recent_title">Recent documents</string>
+    <string name="action_scan">Scan</string>
+    <string name="action_add_pdf">Add PDF</string>
+    <string name="action_vault">Vault</string>
+    <string name="action_benchmark">Benchmark</string>
+    <string name="action_settings">Settings</string>
+    <string name="duplicate_banner">You already saved this %1$s on %2$s.</string>
+    <string name="action_keep_both">Keep both</string>
+    <string name="action_replace">Replace</string>
+    <string name="empty_vault">No documents yet. Allow photo access, scan a document, or add a PDF.</string>
+
+    <!-- Results -->
+    <string name="results_title">Results</string>
+    <string name="results_sources">Source documents</string>
+    <string name="results_mode_llm">Answer written by Qwen from your documents</string>
+    <string name="results_mode_rules">Assistant in rules mode (language model not loaded)</string>
+    <string name="answer_nothing_found">I couldn\'t find a matching document.</string>
+    <plurals name="answer_found_docs">
+        <item quantity="one">Found %1$d document: %2$s</item>
+        <item quantity="other">Found %1$d documents: %2$s</item>
+    </plurals>
+    <string name="reminders_title">Documents with expiry dates</string>
+    <string name="no_expiry_docs">No saved document has an expiry date.</string>
+
+    <!-- Checklist -->
+    <string name="status_found">Found</string>
+    <string name="status_missing">Missing</string>
+    <string name="status_count">%1$d of %2$d</string>
+    <string name="status_optional">Optional</string>
+    <string name="checklist_complete">Everything required is ready.</string>
+    <string name="checklist_incomplete">Some required documents are missing.</string>
+    <string name="action_build_pdf">Make masked PDF and share</string>
+    <string name="pack_building">Masking Aadhaar numbers and building the PDF…</string>
+    <string name="pack_blocked">Sharing blocked for “%1$s”: %2$s</string>
+    <string name="pack_failed">Could not build the PDF: %1$s</string>
+    <string name="pack_cover_generated">Prepared on %1$s with iQOO Recall</string>
+    <string name="pack_cover_masking_note">Aadhaar numbers are masked: only the last 4 digits are shown. QR codes are hidden.</string>
+    <string name="ignored_too_old">Older documents were not counted (too old for this checklist).</string>
+    <string name="ignored_expired">An expired document was not counted.</string>
+    <string name="ignored_same_month">Two documents from the same month count once.</string>
+
+    <!-- Document detail -->
+    <string name="doc_title">Document</string>
+    <string name="field_type">Type</string>
+    <string name="field_expiry">Expiry</string>
+    <string name="field_issued">Issued</string>
+    <string name="field_owner">Name</string>
+    <string name="field_source">Source</string>
+    <string name="field_source_missing">The original was deleted from the gallery; the encrypted copy is kept.</string>
+    <string name="field_entities">Details found</string>
+    <string name="field_confidence">Detected by %1$s (%2$d%%)</string>
+    <string name="action_change_type">Change type</string>
+    <string name="action_edit_expiry">Edit expiry</string>
+    <string name="expiry_hint">YYYY-MM-DD, or empty for none</string>
+    <string name="action_delete">Delete</string>
+    <string name="confirm_delete">Delete this document and its encrypted copy?</string>
+    <string name="action_test_reminder">Test reminder in 1 minute</string>
+    <string name="test_reminder_set">Test reminder set for one minute from now.</string>
+
+    <!-- Vault -->
+    <string name="vault_title">Vault</string>
+    <string name="filter_all">All</string>
+    <string name="filter_person">Person</string>
+
+    <!-- Camera -->
+    <string name="camera_title">Scan a document</string>
+    <string name="camera_expected">Scanning: %1$s</string>
+    <string name="action_capture">Capture</string>
+    <string name="scan_processing">Reading the document…</string>
+    <string name="scan_saved">Saved as %1$s.</string>
+    <string name="scan_duplicate">Already saved on %1$s.</string>
+    <string name="scan_failed">Could not read this scan: %1$s</string>
+    <string name="scan_not_document">This doesn\'t look like a document.</string>
+    <string name="camera_permission_needed">Camera permission is needed to scan documents.</string>
+
+    <!-- Emergency -->
+    <string name="emergency_title">Emergency health pack</string>
+    <string name="emergency_read_aloud">Read aloud</string>
+    <string name="emergency_stop">Stop</string>
+    <string name="emergency_tts_fallback">A %1$s voice isn\'t installed, so it was read in English.</string>
+    <string name="emergency_tts_unavailable">Read-aloud is not available on this phone.</string>
+    <string name="emergency_open_vault">Open the full vault</string>
+    <string name="emergency_locked_note">Shown without unlocking. Only this health pack is visible; Aadhaar is masked.</string>
+    <string name="emergency_missing_item">%1$s: not saved yet.</string>
+    <string name="emergency_item_valid_till">%1$s, valid till %2$s.</string>
+    <string name="emergency_item_with_id">%1$s, number ending %2$s.</string>
+    <string name="emergency_item">%1$s: %2$s.</string>
+    <string name="tile_label">Emergency pack</string>
+
+    <!-- Models and benchmark -->
+    <string name="models_title">Models</string>
+    <string name="models_missing">Some on-device models are missing or damaged.</string>
+    <string name="models_push_hint">Push them with scripts/push_models.sh. Expected location:</string>
+    <string name="action_continue_fallback">Continue without them</string>
+    <string name="model_state_missing">Missing</string>
+    <string name="model_state_loading">Loading…</string>
+    <string name="model_state_failed">Failed: %1$s</string>
+    <string name="model_state_ready">%1$s · loaded in %2$d ms</string>
+    <string name="model_state_not_loaded">Not loaded</string>
+    <string name="action_load_llm">Load Qwen</string>
+    <string name="bench_title">Benchmark</string>
+    <string name="bench_models">Models and compute units</string>
+    <string name="bench_latency">Measured latency (ms)</string>
+    <string name="bench_index">Index</string>
+    <string name="bench_run">Run benchmark</string>
+    <string name="bench_running">Running…</string>
+    <string name="bench_run_eval">Run EVAL queries</string>
+    <string name="bench_no_data">No measurements yet.</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="perm_photos">Photos</string>
+    <string name="perm_notifications">Notifications</string>
+    <string name="perm_exact_alarms">Exact reminder alarms</string>
+    <string name="perm_camera">Camera</string>
+    <string name="perm_mic">Microphone</string>
+    <string name="perm_granted">Allowed</string>
+    <string name="perm_partial">Some photos only</string>
+    <string name="perm_denied">Not allowed</string>
+    <string name="voice_langs">Offline voice languages</string>
+    <string name="tts_langs">Read-aloud voices</string>
+    <string name="lang_available">%1$s: available</string>
+    <string name="lang_unavailable">%1$s: not installed</string>
+    <string name="skipped_images">Images skipped as non-documents</string>
+    <string name="action_mark_document">Mark as document</string>
+    <string name="allow_screen_capture">Allow screenshots and screen mirroring (for demos)</string>
+    <string name="app_language">App language</string>
+
+    <!-- Notifications -->
+    <string name="channel_expiry">Expiry reminders</string>
+    <string name="channel_indexing">Indexing</string>
+    <plurals name="expires_in_days">
+        <item quantity="one">%1$s expires in %2$d day</item>
+        <item quantity="other">%1$s expires in %2$d days</item>
+    </plurals>
+    <string name="reminder_body">Tap to open the renewal checklist.</string>
+    <string name="reminder_test_title">Test reminder: %1$s</string>
+
+    <!-- Templates -->
+    <string name="template_home_loan">Home loan</string>
+    <string name="template_health_insurance_claim">Health insurance claim</string>
+    <string name="template_vehicle_insurance_renewal">Vehicle insurance renewal</string>
+    <string name="template_emergency_health">Emergency health pack</string>
+    <string name="template_passport">Passport application</string>
+    <string name="template_health_insurance_renewal">Health insurance renewal</string>
+    <string name="template_driving_licence_renewal">Driving licence renewal</string>
+    <string name="template_life_insurance_renewal">Life insurance renewal</string>
+    <string name="template_renewal_generic">Renewal</string>
+
+    <!-- Document types -->
+    <string name="doc_AADHAAR">Aadhaar card</string>
+    <string name="doc_PAN">PAN card</string>
+    <string name="doc_DRIVING_LICENCE">Driving licence</string>
+    <string name="doc_VEHICLE_RC">Vehicle RC</string>
+    <string name="doc_PASSPORT">Passport</string>
+    <string name="doc_VOTER_ID">Voter ID</string>
+    <string name="doc_HEALTH_ID_ABHA">ABHA health ID</string>
+    <string name="doc_HEALTH_INSURANCE">Health insurance</string>
+    <string name="doc_VEHICLE_INSURANCE">Vehicle insurance</string>
+    <string name="doc_LIFE_INSURANCE">Life insurance</string>
+    <string name="doc_SALARY_SLIP">Salary slip</string>
+    <string name="doc_BANK_STATEMENT">Bank statement</string>
+    <string name="doc_EMPLOYMENT_LETTER">Employment letter</string>
+    <string name="doc_ITR_FORM16">ITR / Form 16</string>
+    <string name="doc_RENT_AGREEMENT">Rent agreement</string>
+    <string name="doc_PROPERTY_PAPER">Property papers</string>
+    <string name="doc_LOAN_SANCTION_EMI">Loan sanction / EMI</string>
+    <string name="doc_MEDICAL_REPORT">Medical report</string>
+    <string name="doc_HOSPITAL_BILL">Hospital bill</string>
+    <string name="doc_PRESCRIPTION">Prescription</string>
+    <string name="doc_UTILITY_BILL">Utility bill</string>
+    <string name="doc_RECEIPT_INVOICE">Receipt / invoice</string>
+    <string name="doc_PAYMENT_SCREENSHOT">Payment screenshot</string>
+    <string name="doc_WARRANTY">Warranty card</string>
+    <string name="doc_TICKET">Ticket</string>
+    <string name="doc_OTHER_DOCUMENT">Other document</string>
+</resources>

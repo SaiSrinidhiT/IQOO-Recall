@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tagline">निजी दस्तावेज़ सहायक</string>
+    <string name="device_label">डिवाइस</string>
+    <string name="android_label">एंड्रॉइड</string>
+    <string name="offline_ok">ऑफ़लाइन बिल्ड: इंटरनेट अनुमति नहीं</string>
+    <string name="offline_violation">चेतावनी: यह बिल्ड इंटरनेट अनुमति माँगता है</string>
+
+    <string name="back">वापस</string>
+    <string name="cancel">रद्द करें</string>
+    <string name="ok">ठीक है</string>
+    <string name="save">सहेजें</string>
+    <string name="loading">लोड हो रहा है…</string>
+    <string name="opening_vault">आपकी एन्क्रिप्टेड तिजोरी खुल रही है…</string>
+
+    <string name="lock_title">आपकी तिजोरी लॉक है</string>
+    <string name="lock_subtitle">फ़िंगरप्रिंट, फ़ेस या स्क्रीन लॉक से अनलॉक करें।</string>
+    <string name="action_unlock">अनलॉक करें</string>
+    <string name="biometric_title">iQOO Recall अनलॉक करें</string>
+    <string name="lock_no_credential">कोई स्क्रीन लॉक सेट नहीं है, इसलिए तिजोरी लॉक नहीं हो सकती। अपने दस्तावेज़ सुरक्षित रखने के लिए सेटिंग्स में स्क्रीन लॉक सेट करें।</string>
+    <string name="action_continue">जारी रखें</string>
+
+    <string name="ask_hint">हिंदी, English या తెలుగు में पूछें</string>
+    <string name="action_ask">पूछें</string>
+    <string name="action_voice">बोलें</string>
+    <string name="voice_listening">सुन रहा है…</string>
+    <string name="voice_unavailable">इस भाषा के लिए ऑफ़लाइन वॉइस इनपुट उपलब्ध नहीं है। टाइप करके पूछ सकते हैं।</string>
+    <string name="emergency_button">आपातकाल</string>
+    <string name="packs_title">दस्तावेज़ तैयार करें</string>
+    <string name="index_title">इंडेक्स हो रहा है</string>
+    <string name="index_progress">%1$d पूरे · %2$d बाकी · लगभग %3$d सेकंड</string>
+    <string name="index_idle">आपकी तिजोरी में %1$d दस्तावेज़</string>
+    <string name="index_partial_access">ऐप के साथ केवल कुछ फ़ोटो साझा हैं, इसलिए इंडेक्स अधूरा है।</string>
+    <string name="action_change_access">एक्सेस बदलें</string>
+    <string name="grant_photos">फ़ोटो एक्सेस दें ताकि ऐप आपके दस्तावेज़ ढूँढ सके।</string>
+    <string name="action_grant">अनुमति दें</string>
+    <string name="expiring_title">समाप्ति तिथियाँ</string>
+    <string name="expired">समाप्त</string>
+    <string name="expires_on">%1$s को समाप्त</string>
+    <string name="recent_title">हाल के दस्तावेज़</string>
+    <string name="action_scan">स्कैन करें</string>
+    <string name="action_add_pdf">PDF जोड़ें</string>
+    <string name="action_vault">तिजोरी</string>
+    <string name="action_benchmark">बेंचमार्क</string>
+    <string name="action_settings">सेटिंग्स</string>
+    <string name="duplicate_banner">आप यह %1$s पहले ही %2$s को सहेज चुके हैं।</string>
+    <string name="action_keep_both">दोनों रखें</string>
+    <string name="action_replace">बदलें</string>
+    <string name="empty_vault">अभी कोई दस्तावेज़ नहीं है। फ़ोटो एक्सेस दें, कोई दस्तावेज़ स्कैन करें या PDF जोड़ें।</string>
+
+    <string name="results_title">नतीजे</string>
+    <string name="results_sources">स्रोत दस्तावेज़</string>
+    <string name="results_mode_llm">Qwen ने आपके दस्तावेज़ों से यह उत्तर लिखा</string>
+    <string name="results_mode_rules">सहायक नियम मोड में है (भाषा मॉडल लोड नहीं हुआ)</string>
+    <string name="answer_nothing_found">मुझे कोई मिलता-जुलता दस्तावेज़ नहीं मिला।</string>
+    <plurals name="answer_found_docs">
+        <item quantity="one">%1$d दस्तावेज़ मिला: %2$s</item>
+        <item quantity="other">%1$d दस्तावेज़ मिले: %2$s</item>
+    </plurals>
+    <string name="reminders_title">समाप्ति तिथि वाले दस्तावेज़</string>
+    <string name="no_expiry_docs">किसी सहेजे गए दस्तावेज़ में समाप्ति तिथि नहीं है।</string>
+
+    <string name="status_found">मिला</string>
+    <string name="status_missing">नहीं है</string>
+    <string name="status_count">%2$d में से %1$d</string>
+    <string name="status_optional">वैकल्पिक</string>
+    <string name="checklist_complete">सभी ज़रूरी दस्तावेज़ तैयार हैं।</string>
+    <string name="checklist_incomplete">कुछ ज़रूरी दस्तावेज़ नहीं हैं।</string>
+    <string name="action_build_pdf">मास्क की हुई PDF बनाएँ और शेयर करें</string>
+    <string name="pack_building">आधार नंबर छिपाए जा रहे हैं और PDF बन रही है…</string>
+    <string name="pack_blocked">“%1$s” का शेयर रोका गया: %2$s</string>
+    <string name="pack_failed">PDF नहीं बन सकी: %1$s</string>
+    <string name="pack_cover_generated">iQOO Recall द्वारा %1$s को तैयार</string>
+    <string name="pack_cover_masking_note">आधार नंबर छिपाए गए हैं: केवल अंतिम 4 अंक दिखते हैं। QR कोड छिपाए गए हैं।</string>
+    <string name="ignored_too_old">पुराने दस्तावेज़ नहीं गिने गए (इस सूची के लिए बहुत पुराने)।</string>
+    <string name="ignored_expired">एक समाप्त दस्तावेज़ नहीं गिना गया।</string>
+    <string name="ignored_same_month">एक ही महीने के दो दस्तावेज़ एक गिने जाते हैं।</string>
+
+    <string name="doc_title">दस्तावेज़</string>
+    <string name="field_type">प्रकार</string>
+    <string name="field_expiry">समाप्ति</string>
+    <string name="field_issued">जारी</string>
+    <string name="field_owner">नाम</string>
+    <string name="field_source">स्रोत</string>
+    <string name="field_source_missing">मूल फ़ाइल गैलरी से हटा दी गई है; एन्क्रिप्टेड प्रति सुरक्षित है।</string>
+    <string name="field_entities">मिली जानकारी</string>
+    <string name="field_confidence">%1$s द्वारा पहचाना गया (%2$d%%)</string>
+    <string name="action_change_type">प्रकार बदलें</string>
+    <string name="action_edit_expiry">समाप्ति तिथि बदलें</string>
+    <string name="expiry_hint">YYYY-MM-DD, या खाली छोड़ें</string>
+    <string name="action_delete">हटाएँ</string>
+    <string name="confirm_delete">यह दस्तावेज़ और इसकी एन्क्रिप्टेड प्रति हटाएँ?</string>
+    <string name="action_test_reminder">1 मिनट में टेस्ट रिमाइंडर</string>
+    <string name="test_reminder_set">टेस्ट रिमाइंडर एक मिनट बाद के लिए सेट है।</string>
+
+    <string name="vault_title">तिजोरी</string>
+    <string name="filter_all">सभी</string>
+    <string name="filter_person">व्यक्ति</string>
+
+    <string name="camera_title">दस्तावेज़ स्कैन करें</string>
+    <string name="camera_expected">स्कैन: %1$s</string>
+    <string name="action_capture">फ़ोटो लें</string>
+    <string name="scan_processing">दस्तावेज़ पढ़ा जा रहा है…</string>
+    <string name="scan_saved">%1$s के रूप में सहेजा गया।</string>
+    <string name="scan_duplicate">पहले ही %1$s को सहेजा गया था।</string>
+    <string name="scan_failed">यह स्कैन पढ़ा नहीं जा सका: %1$s</string>
+    <string name="scan_not_document">यह दस्तावेज़ जैसा नहीं दिखता।</string>
+    <string name="camera_permission_needed">दस्तावेज़ स्कैन करने के लिए कैमरा अनुमति चाहिए।</string>
+
+    <string name="emergency_title">आपातकालीन स्वास्थ्य पैक</string>
+    <string name="emergency_read_aloud">पढ़कर सुनाएँ</string>
+    <string name="emergency_stop">रोकें</string>
+    <string name="emergency_tts_fallback">%1$s आवाज़ इंस्टॉल नहीं है, इसलिए अंग्रेज़ी में पढ़ा गया।</string>
+    <string name="emergency_tts_unavailable">इस फ़ोन पर पढ़कर सुनाने की सुविधा उपलब्ध नहीं है।</string>
+    <string name="emergency_open_vault">पूरी तिजोरी खोलें</string>
+    <string name="emergency_locked_note">अनलॉक किए बिना दिखाया गया। केवल यह स्वास्थ्य पैक दिखता है; आधार छिपा हुआ है।</string>
+    <string name="emergency_missing_item">%1$s: अभी सहेजा नहीं गया।</string>
+    <string name="emergency_item_valid_till">%1$s, %2$s तक मान्य।</string>
+    <string name="emergency_item_with_id">%1$s, नंबर के अंतिम अंक %2$s।</string>
+    <string name="emergency_item">%1$s: %2$s।</string>
+    <string name="tile_label">आपातकालीन पैक</string>
+
+    <string name="models_title">मॉडल</string>
+    <string name="models_missing">डिवाइस पर कुछ मॉडल नहीं हैं या ख़राब हैं।</string>
+    <string name="models_push_hint">इन्हें scripts/push_models.sh से पुश करें। अपेक्षित स्थान:</string>
+    <string name="action_continue_fallback">इनके बिना जारी रखें</string>
+    <string name="model_state_missing">नहीं है</string>
+    <string name="model_state_loading">लोड हो रहा है…</string>
+    <string name="model_state_failed">विफल: %1$s</string>
+    <string name="model_state_ready">%1$s · %2$d ms में लोड</string>
+    <string name="model_state_not_loaded">लोड नहीं हुआ</string>
+    <string name="action_load_llm">Qwen लोड करें</string>
+    <string name="bench_title">बेंचमार्क</string>
+    <string name="bench_models">मॉडल और कंप्यूट यूनिट</string>
+    <string name="bench_latency">मापी गई देरी (ms)</string>
+    <string name="bench_index">इंडेक्स</string>
+    <string name="bench_run">बेंचमार्क चलाएँ</string>
+    <string name="bench_running">चल रहा है…</string>
+    <string name="bench_run_eval">EVAL प्रश्न चलाएँ</string>
+    <string name="bench_no_data">अभी कोई माप नहीं।</string>
+
+    <string name="settings_title">सेटिंग्स</string>
+    <string name="perm_photos">फ़ोटो</string>
+    <string name="perm_notifications">सूचनाएँ</string>
+    <string name="perm_exact_alarms">सटीक रिमाइंडर अलार्म</string>
+    <string name="perm_camera">कैमरा</string>
+    <string name="perm_mic">माइक्रोफ़ोन</string>
+    <string name="perm_granted">अनुमति है</string>
+    <string name="perm_partial">केवल कुछ फ़ोटो</string>
+    <string name="perm_denied">अनुमति नहीं</string>
+    <string name="voice_langs">ऑफ़लाइन आवाज़ भाषाएँ</string>
+    <string name="tts_langs">पढ़कर सुनाने वाली आवाज़ें</string>
+    <string name="lang_available">%1$s: उपलब्ध</string>
+    <string name="lang_unavailable">%1$s: इंस्टॉल नहीं</string>
+    <string name="skipped_images">गैर-दस्तावेज़ मानकर छोड़ी गई तस्वीरें</string>
+    <string name="action_mark_document">दस्तावेज़ मानें</string>
+    <string name="allow_screen_capture">स्क्रीनशॉट और स्क्रीन मिररिंग की अनुमति दें (डेमो के लिए)</string>
+    <string name="app_language">ऐप की भाषा</string>
+
+    <string name="channel_expiry">समाप्ति रिमाइंडर</string>
+    <string name="channel_indexing">इंडेक्सिंग</string>
+    <plurals name="expires_in_days">
+        <item quantity="one">%1$s %2$d दिन में समाप्त होगा</item>
+        <item quantity="other">%1$s %2$d दिनों में समाप्त होगा</item>
+    </plurals>
+    <string name="reminder_body">नवीनीकरण सूची खोलने के लिए टैप करें।</string>
+    <string name="reminder_test_title">टेस्ट रिमाइंडर: %1$s</string>
+
+    <string name="template_home_loan">होम लोन</string>
+    <string name="template_health_insurance_claim">स्वास्थ्य बीमा क्लेम</string>
+    <string name="template_vehicle_insurance_renewal">वाहन बीमा नवीनीकरण</string>
+    <string name="template_emergency_health">आपातकालीन स्वास्थ्य पैक</string>
+    <string name="template_passport">पासपोर्ट आवेदन</string>
+    <string name="template_health_insurance_renewal">स्वास्थ्य बीमा नवीनीकरण</string>
+    <string name="template_driving_licence_renewal">ड्राइविंग लाइसेंस नवीनीकरण</string>
+    <string name="template_life_insurance_renewal">जीवन बीमा नवीनीकरण</string>
+    <string name="template_renewal_generic">नवीनीकरण</string>
+
+    <string name="doc_AADHAAR">आधार कार्ड</string>
+    <string name="doc_PAN">पैन कार्ड</string>
+    <string name="doc_DRIVING_LICENCE">ड्राइविंग लाइसेंस</string>
+    <string name="doc_VEHICLE_RC">वाहन आरसी</string>
+    <string name="doc_PASSPORT">पासपोर्ट</string>
+    <string name="doc_VOTER_ID">वोटर आईडी</string>
+    <string name="doc_HEALTH_ID_ABHA">आभा हेल्थ आईडी</string>
+    <string name="doc_HEALTH_INSURANCE">स्वास्थ्य बीमा</string>
+    <string name="doc_VEHICLE_INSURANCE">वाहन बीमा</string>
+    <string name="doc_LIFE_INSURANCE">जीवन बीमा</string>
+    <string name="doc_SALARY_SLIP">सैलरी स्लिप</string>
+    <string name="doc_BANK_STATEMENT">बैंक स्टेटमेंट</string>
+    <string name="doc_EMPLOYMENT_LETTER">रोज़गार पत्र</string>
+    <string name="doc_ITR_FORM16">आईटीआर / फ़ॉर्म 16</string>
+    <string name="doc_RENT_AGREEMENT">किराया अनुबंध</string>
+    <string name="doc_PROPERTY_PAPER">संपत्ति के कागज़</string>
+    <string name="doc_LOAN_SANCTION_EMI">लोन स्वीकृति / ईएमआई</string>
+    <string name="doc_MEDICAL_REPORT">मेडिकल रिपोर्ट</string>
+    <string name="doc_HOSPITAL_BILL">अस्पताल का बिल</string>
+    <string name="doc_PRESCRIPTION">दवा की पर्ची</string>
+    <string name="doc_UTILITY_BILL">बिजली/पानी बिल</string>
+    <string name="doc_RECEIPT_INVOICE">रसीद / इनवॉइस</string>
+    <string name="doc_PAYMENT_SCREENSHOT">पेमेंट स्क्रीनशॉट</string>
+    <string name="doc_WARRANTY">वारंटी कार्ड</string>
+    <string name="doc_TICKET">टिकट</string>
+    <string name="doc_OTHER_DOCUMENT">अन्य दस्तावेज़</string>
+</resources>

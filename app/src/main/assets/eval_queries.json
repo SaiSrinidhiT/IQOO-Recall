@@ -1,0 +1,22 @@
+[
+  {"id": 1, "lang": "en", "query": "show my salary slips", "expect_types": ["SALARY_SLIP"]},
+  {"id": 2, "lang": "en", "query": "when does my health insurance expire", "expect_types": ["HEALTH_INSURANCE"]},
+  {"id": 3, "lang": "en", "query": "car insurance policy", "expect_types": ["VEHICLE_INSURANCE"]},
+  {"id": 4, "lang": "en", "query": "my PAN card", "expect_types": ["PAN"]},
+  {"id": 5, "lang": "en", "query": "latest blood test report", "expect_types": ["MEDICAL_REPORT"]},
+  {"id": 6, "lang": "en", "query": "hospital bill from my last admission", "expect_types": ["HOSPITAL_BILL"]},
+  {"id": 7, "lang": "en", "query": "bank statement for last month", "expect_types": ["BANK_STATEMENT"]},
+  {"id": 8, "lang": "te", "query": "నా ఆధార్ కార్డ్ చూపించు", "expect_types": ["AADHAAR"]},
+  {"id": 9, "lang": "te", "query": "జీతం స్లిప్పులు చూపించు", "expect_types": ["SALARY_SLIP"]},
+  {"id": 10, "lang": "te", "query": "కరెంట్ బిల్లు ఎంత", "expect_types": ["UTILITY_BILL"]},
+  {"id": 11, "lang": "te", "query": "naa health insurance ekkada undi", "expect_types": ["HEALTH_INSURANCE"]},
+  {"id": 12, "lang": "te", "query": "bank statement chupinchu", "expect_types": ["BANK_STATEMENT"]},
+  {"id": 13, "lang": "te", "query": "ఆసుపత్రి బిల్లు", "expect_types": ["HOSPITAL_BILL"]},
+  {"id": 14, "lang": "te", "query": "Home loan ki documents ready cheyyi", "expect_template": "home_loan"},
+  {"id": 15, "lang": "hi", "query": "मेरा आधार कार्ड दिखाओ", "expect_types": ["AADHAAR"]},
+  {"id": 16, "lang": "hi", "query": "पिछले महीने की सैलरी स्लिप", "expect_types": ["SALARY_SLIP"]},
+  {"id": 17, "lang": "hi", "query": "मेरी मेडिकल रिपोर्ट", "expect_types": ["MEDICAL_REPORT"]},
+  {"id": 18, "lang": "hi", "query": "गाड़ी का बीमा", "expect_types": ["VEHICLE_INSURANCE"]},
+  {"id": 19, "lang": "hi", "query": "आभा कार्ड दिखाओ", "expect_types": ["HEALTH_ID_ABHA"]},
+  {"id": 20, "lang": "hi", "query": "ऑफर लेटर या नौकरी का पत्र", "expect_types": ["EMPLOYMENT_LETTER"]}
+]

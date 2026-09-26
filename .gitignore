@@ -1,0 +1,40 @@
+# Gradle / Android build output
+.gradle/
+.kotlin/
+build/
+/local.properties
+/captures
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# IDEs / OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Python tooling
+.venv/
+__pycache__/
+*.pyc
+
+# Secrets: never commit tokens or signing keys
+*.ini
+*.jks
+*.keystore
+.env
+
+# Model files are pushed to the phone with scripts/push_models.sh, never committed
+/models/
+*.tflite
+*.dlc
+*.onnx
+*.safetensors
+*.bin
+
+# Generated synthetic seed documents
+/tools/out/

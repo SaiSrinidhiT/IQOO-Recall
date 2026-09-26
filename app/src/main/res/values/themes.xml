@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Compose draws all UI; this theme only covers the window before the first frame. -->
+    <style name="Theme.Recall" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+    </style>
+    <color name="window_background">#FFFDF8F3</color>
+    <color name="launcher_background">#FF1F3A5F</color>
+    <color name="window_background_dark">#FF121417</color>
+</resources>

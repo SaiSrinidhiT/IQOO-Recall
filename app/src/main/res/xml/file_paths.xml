@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Only the temporary masked-pack folder is shareable. -->
+<paths>
+    <cache-path name="share" path="share/" />
+</paths>

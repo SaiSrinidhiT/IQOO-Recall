@@ -1,0 +1,101 @@
+{
+  "templates": [
+    {
+      "id": "home_loan",
+      "title_en": "Home loan",
+      "items": [
+        {"doc_type": "AADHAAR", "count": 1},
+        {"doc_type": "PAN", "count": 1},
+        {"doc_type": "BANK_STATEMENT", "count": 1, "recency": {"rule": "within_months", "months": 6}},
+        {"doc_type": "SALARY_SLIP", "count": 3, "recency": {"rule": "distinct_months", "months": 3}},
+        {"doc_type": "EMPLOYMENT_LETTER", "count": 1}
+      ]
+    },
+    {
+      "id": "health_insurance_claim",
+      "title_en": "Health insurance claim",
+      "items": [
+        {"doc_type": "HEALTH_INSURANCE", "count": 1, "recency": {"rule": "not_expired"}},
+        {"doc_type": "AADHAAR", "count": 1},
+        {"doc_type": "HOSPITAL_BILL", "count": 1},
+        {"doc_type": "MEDICAL_REPORT", "count": 1, "recency": {"rule": "most_recent", "months": 6}},
+        {"doc_type": "PRESCRIPTION", "count": 1, "optional": true},
+        {"doc_type": "PAN", "count": 1, "optional": true},
+        {"doc_type": "HEALTH_ID_ABHA", "count": 1, "optional": true}
+      ]
+    },
+    {
+      "id": "vehicle_insurance_renewal",
+      "title_en": "Vehicle insurance renewal",
+      "items": [
+        {"doc_type": "VEHICLE_INSURANCE", "count": 1},
+        {"doc_type": "VEHICLE_RC", "count": 1},
+        {"doc_type": "DRIVING_LICENCE", "count": 1},
+        {"doc_type": "PAN", "count": 1, "optional": true}
+      ]
+    },
+    {
+      "id": "emergency_health",
+      "title_en": "Emergency health pack",
+      "items": [
+        {"doc_type": "HEALTH_INSURANCE", "count": 1, "recency": {"rule": "not_expired"}},
+        {"doc_type": "HEALTH_ID_ABHA", "count": 1},
+        {"doc_type": "AADHAAR", "count": 1},
+        {"doc_type": "MEDICAL_REPORT", "count": 3, "min": 1, "recency": {"rule": "most_recent", "months": 12}}
+      ]
+    },
+    {
+      "id": "passport",
+      "title_en": "Passport application",
+      "items": [
+        {"doc_type": "AADHAAR", "count": 1},
+        {"doc_type": "PAN", "count": 1, "optional": true},
+        {"doc_type": "UTILITY_BILL", "count": 1, "optional": true, "recency": {"rule": "within_months", "months": 3}},
+        {"doc_type": "PASSPORT", "count": 1, "optional": true}
+      ]
+    },
+    {
+      "id": "health_insurance_renewal",
+      "title_en": "Health insurance renewal",
+      "items": [
+        {"doc_type": "HEALTH_INSURANCE", "count": 1},
+        {"doc_type": "AADHAAR", "count": 1},
+        {"doc_type": "PAN", "count": 1, "optional": true},
+        {"doc_type": "MEDICAL_REPORT", "count": 1, "optional": true, "recency": {"rule": "most_recent", "months": 12}}
+      ]
+    },
+    {
+      "id": "driving_licence_renewal",
+      "title_en": "Driving licence renewal",
+      "items": [
+        {"doc_type": "DRIVING_LICENCE", "count": 1},
+        {"doc_type": "AADHAAR", "count": 1},
+        {"doc_type": "MEDICAL_REPORT", "count": 1, "optional": true, "recency": {"rule": "most_recent", "months": 6}}
+      ]
+    },
+    {
+      "id": "life_insurance_renewal",
+      "title_en": "Life insurance renewal",
+      "items": [
+        {"doc_type": "LIFE_INSURANCE", "count": 1},
+        {"doc_type": "PAN", "count": 1, "optional": true}
+      ]
+    },
+    {
+      "id": "renewal_generic",
+      "title_en": "Renewal",
+      "items": [
+        {"doc_type": "AADHAAR", "count": 1},
+        {"doc_type": "PAN", "count": 1, "optional": true}
+      ]
+    }
+  ],
+  "renewal_for": {
+    "VEHICLE_INSURANCE": "vehicle_insurance_renewal",
+    "HEALTH_INSURANCE": "health_insurance_renewal",
+    "LIFE_INSURANCE": "life_insurance_renewal",
+    "DRIVING_LICENCE": "driving_licence_renewal",
+    "PASSPORT": "passport"
+  },
+  "default_renewal": "renewal_generic"
+}

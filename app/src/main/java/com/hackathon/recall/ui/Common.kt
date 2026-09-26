@@ -1,0 +1,119 @@
+package com.hackathon.recall.ui
+
+import android.graphics.Bitmap
+import android.util.LruCache
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import com.hackathon.recall.AppContainer
+import com.hackathon.recall.R
+import com.hackathon.recall.data.DocumentEntity
+import com.hackathon.recall.data.type
+import com.hackathon.recall.i18n.docTypeName
+import com.hackathon.recall.ingest.ImageLoader
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.time.LocalDate
+
+val LocalContainer = compositionLocalOf<AppContainer> { error("AppContainer not provided") }
+
+@Composable
+fun SectionTitle(text: String, modifier: Modifier = Modifier) {
+    Text(text, style = MaterialTheme.typography.titleMedium, modifier = modifier.padding(top = 16.dp, bottom = 8.dp))
+}
+
+/** One document in a list: thumbnail, localized type, English title, expiry badge. */
+@Composable
+fun DocRow(doc: DocumentEntity, onClick: () -> Unit, trailing: @Composable (() -> Unit)? = null) {
+    val context = LocalContext.current
+    Row(
+        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Thumbnail(doc, Modifier.size(52.dp))
+        Column(Modifier.weight(1f)) {
+            Text(context.docTypeName(doc.type()), style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(doc.titleEn, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        }
+        doc.expiryOn?.let { ExpiryBadge(LocalDate.parse(it)) }
+        trailing?.invoke()
+    }
+}
+
+@Composable
+fun ExpiryBadge(expiry: LocalDate) {
+    val expired = expiry.isBefore(LocalDate.now())
+    val bg = if (expired) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.secondaryContainer
+    val fg = if (expired) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSecondaryContainer
+    Text(
+        if (expired) stringResource(R.string.expired) else stringResource(R.string.expires_on, expiry.toString()),
+        color = fg,
+        style = MaterialTheme.typography.labelSmall,
+        modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(bg).padding(horizontal = 8.dp, vertical = 4.dp),
+    )
+}
+
+private val thumbCache = LruCache<Long, ImageBitmap>(64)
+
+/** Decrypts and decodes a small preview; cached in memory only. */
+@Composable
+fun Thumbnail(doc: DocumentEntity, modifier: Modifier = Modifier) {
+    val container = LocalContainer.current
+    val image by produceState(thumbCache.get(doc.id), doc.id) {
+        if (value == null) {
+            value = withContext(Dispatchers.IO) {
+                runCatching {
+                    val bytes = container.repository.readOriginal(doc)
+                    val bmp: Bitmap = if (doc.mimeType == "application/pdf") ImageLoader.renderPdf(bytes, 256, 1).first() else ImageLoader.decode(bytes, 256)
+                    bmp.asImageBitmap().also { thumbCache.put(doc.id, it) }
+                }.getOrNull()
+            }
+        }
+    }
+    Box(modifier.clip(RoundedCornerShape(8.dp)).background(MaterialTheme.colorScheme.surfaceVariant)) {
+        image?.let { Image(it, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.matchParentSize()) }
+    }
+}
+
+/** Full-resolution preview for the detail screen (first page for PDFs). */
+@Composable
+fun Preview(doc: DocumentEntity, modifier: Modifier = Modifier) {
+    val container = LocalContainer.current
+    val image by produceState<ImageBitmap?>(null, doc.id) {
+        value = withContext(Dispatchers.IO) {
+            runCatching {
+                val bytes = container.repository.readOriginal(doc)
+                val bmp = if (doc.mimeType == "application/pdf") ImageLoader.renderPdf(bytes, 1400, 1).first() else ImageLoader.decode(bytes, 1400)
+                bmp.asImageBitmap()
+            }.getOrNull()
+        }
+    }
+    Box(modifier.clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant)) {
+        image?.let { Image(it, contentDescription = null, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxWidth()) }
+    }
+}
