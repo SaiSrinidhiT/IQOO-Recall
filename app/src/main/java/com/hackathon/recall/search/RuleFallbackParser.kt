@@ -29,7 +29,6 @@ class RuleFallbackParser(private val lexicon: Lexicon) {
         fun has(intent: String) = match(q, mapOf(intent to lexicon.intentWords[intent].orEmpty())).isNotEmpty()
 
         val kind = when {
-            has("emergency") || template == "emergency_health" -> IntentKind.EMERGENCY
             has("reminders") && template == null -> IntentKind.REMINDERS
             template != null -> IntentKind.PACK
             has("pack") && docTypes.isNotEmpty() -> IntentKind.FIND
@@ -45,7 +44,7 @@ class RuleFallbackParser(private val lexicon: Lexicon) {
         }.joinToString(" ")
         return QueryIntent(
             kind = kind,
-            template = if (kind == IntentKind.EMERGENCY) "emergency_health" else template,
+            template = template,
             docTypes = docTypes,
             queryEn = english,
             dateFrom = from,

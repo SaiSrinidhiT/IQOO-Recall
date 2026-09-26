@@ -23,13 +23,35 @@
     <string name="lock_no_credential">No screen lock is set, so the vault can\'t be locked. Set one in Settings to protect your documents.</string>
     <string name="action_continue">Continue</string>
 
+    <!-- Onboarding -->
+    <string name="onboarding_title">Find your documents instantly</string>
+    <string name="onboarding_subtitle">Recall scans photos on this device to find IDs, insurance, salary slips and more, so you can just ask for them later.</string>
+    <string name="onboarding_privacy">100% on-device. Nothing ever leaves your phone.</string>
+    <string name="index_preparing">Scanning your gallery…</string>
+    <string name="index_stop">Stop</string>
+    <string name="index_resume">Resume scanning</string>
+    <string name="index_paused_title">Scan stopped</string>
+    <string name="index_done_title">Scan complete</string>
+    <string name="index_scanned">%1$d of %2$d photos scanned</string>
+    <string name="index_documents_found">Documents found</string>
+    <string name="index_other_photos">Other photos</string>
+    <string name="index_failed">Couldn\'t read</string>
+    <string name="index_not_scanned">Not scanned yet</string>
+    <string name="category_identity">Identity</string>
+    <string name="category_income">Income</string>
+    <string name="category_health">Health</string>
+    <string name="category_property">Property</string>
+    <string name="category_other">Other documents</string>
+    <string name="onboarding_denied">No problem, you can allow access anytime from Settings.</string>
+    <string name="action_allow_access">Allow photo access</string>
+    <string name="action_not_now">Not now</string>
+
     <!-- Home -->
     <string name="ask_hint">Ask in English, తెలుగు or हिंदी</string>
     <string name="action_ask">Ask</string>
     <string name="action_voice">Speak</string>
     <string name="voice_listening">Listening…</string>
     <string name="voice_unavailable">Voice input isn\'t available offline for this language. Typing still works.</string>
-    <string name="emergency_button">Emergency</string>
     <string name="packs_title">Get documents ready</string>
     <string name="index_title">Indexing</string>
     <string name="index_progress">%1$d done · %2$d left · about %3$d s</string>
@@ -116,19 +138,6 @@
     <string name="scan_not_document">This doesn\'t look like a document.</string>
     <string name="camera_permission_needed">Camera permission is needed to scan documents.</string>
 
-    <!-- Emergency -->
-    <string name="emergency_title">Emergency health pack</string>
-    <string name="emergency_read_aloud">Read aloud</string>
-    <string name="emergency_stop">Stop</string>
-    <string name="emergency_tts_fallback">A %1$s voice isn\'t installed, so it was read in English.</string>
-    <string name="emergency_tts_unavailable">Read-aloud is not available on this phone.</string>
-    <string name="emergency_open_vault">Open the full vault</string>
-    <string name="emergency_locked_note">Shown without unlocking. Only this health pack is visible; Aadhaar is masked.</string>
-    <string name="emergency_missing_item">%1$s: not saved yet.</string>
-    <string name="emergency_item_valid_till">%1$s, valid till %2$s.</string>
-    <string name="emergency_item_with_id">%1$s, number ending %2$s.</string>
-    <string name="emergency_item">%1$s: %2$s.</string>
-    <string name="tile_label">Emergency pack</string>
 
     <!-- Models and benchmark -->
     <string name="models_title">Models</string>
@@ -161,9 +170,6 @@
     <string name="perm_partial">Some photos only</string>
     <string name="perm_denied">Not allowed</string>
     <string name="voice_langs">Offline voice languages</string>
-    <string name="tts_langs">Read-aloud voices</string>
-    <string name="lang_available">%1$s: available</string>
-    <string name="lang_unavailable">%1$s: not installed</string>
     <string name="skipped_images">Images skipped as non-documents</string>
     <string name="action_mark_document">Mark as document</string>
     <string name="allow_screen_capture">Allow screenshots and screen mirroring (for demos)</string>
@@ -183,7 +189,6 @@
     <string name="template_home_loan">Home loan</string>
     <string name="template_health_insurance_claim">Health insurance claim</string>
     <string name="template_vehicle_insurance_renewal">Vehicle insurance renewal</string>
-    <string name="template_emergency_health">Emergency health pack</string>
     <string name="template_passport">Passport application</string>
     <string name="template_health_insurance_renewal">Health insurance renewal</string>
     <string name="template_driving_licence_renewal">Driving licence renewal</string>

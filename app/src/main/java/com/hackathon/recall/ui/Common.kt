@@ -46,6 +46,27 @@ fun SectionTitle(text: String, modifier: Modifier = Modifier) {
     Text(text, style = MaterialTheme.typography.titleMedium, modifier = modifier.padding(top = 16.dp, bottom = 8.dp))
 }
 
+/** Home/Vault category keys (also nav args for Routes.vaultCategory) and the doc types in each. */
+object DocCategory {
+    const val OTHER = "other"
+    val TYPES: Map<String, Set<String>> = linkedMapOf(
+        "identity" to setOf("AADHAAR", "PAN", "DRIVING_LICENCE", "PASSPORT", "VOTER_ID"),
+        "income" to setOf("SALARY_SLIP", "BANK_STATEMENT", "EMPLOYMENT_LETTER", "ITR_FORM16", "LOAN_SANCTION_EMI"),
+        "health" to setOf("HEALTH_ID_ABHA", "HEALTH_INSURANCE", "MEDICAL_REPORT", "HOSPITAL_BILL", "PRESCRIPTION"),
+        "property" to setOf("PROPERTY_PAPER", "RENT_AGREEMENT", "VEHICLE_RC", "VEHICLE_INSURANCE", "UTILITY_BILL"),
+    )
+
+    fun of(docType: String): String = TYPES.entries.firstOrNull { docType in it.value }?.key ?: OTHER
+
+    fun label(key: String): Int = when (key) {
+        "identity" -> R.string.category_identity
+        "income" -> R.string.category_income
+        "health" -> R.string.category_health
+        "property" -> R.string.category_property
+        else -> R.string.category_other
+    }
+}
+
 /** One document in a list: thumbnail, localized type, English title, expiry badge. */
 @Composable
 fun DocRow(doc: DocumentEntity, onClick: () -> Unit, trailing: @Composable (() -> Unit)? = null) {

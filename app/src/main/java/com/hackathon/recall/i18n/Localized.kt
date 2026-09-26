@@ -24,7 +24,6 @@ fun Context.templateName(id: String): String = getString(
         "home_loan" -> R.string.template_home_loan
         "health_insurance_claim" -> R.string.template_health_insurance_claim
         "vehicle_insurance_renewal" -> R.string.template_vehicle_insurance_renewal
-        "emergency_health" -> R.string.template_emergency_health
         "passport" -> R.string.template_passport
         "health_insurance_renewal" -> R.string.template_health_insurance_renewal
         "driving_licence_renewal" -> R.string.template_driving_licence_renewal

@@ -28,7 +28,6 @@ class EvalRunner(private val engine: QueryEngine) {
             val r = engine.ask(c.query, useLlm = useLlm)
             when (r) {
                 is QueryResult.Pack -> Outcome(c, c.expectTemplate != null && r.templateId == c.expectTemplate, "pack:${r.templateId}")
-                is QueryResult.Emergency -> Outcome(c, c.expectTemplate == "emergency_health", "emergency")
                 is QueryResult.Reminders -> {
                     val top = r.docs.take(3).map { it.type() }
                     Outcome(c, top.any { it.name in c.expectTypes }, "reminders:" + top.joinToString(","))

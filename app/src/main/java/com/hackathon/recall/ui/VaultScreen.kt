@@ -72,13 +72,7 @@ fun VaultScreen(nav: NavHostController, initialCategory: String? = null) {
     val context = LocalContext.current
     val docs by container.repository.observeDocuments().collectAsState(emptyList())
 
-    // Map category names from HomeScreen to DocType sets
-    val categoryDocTypes = mapOf(
-        "identity" to setOf("AADHAAR", "PAN", "DRIVING_LICENCE", "PASSPORT", "VOTER_ID"),
-        "income" to setOf("SALARY_SLIP", "BANK_STATEMENT", "EMPLOYMENT_LETTER", "ITR_FORM16", "LOAN_SANCTION_EMI"),
-        "health" to setOf("HEALTH_ID_ABHA", "HEALTH_INSURANCE", "MEDICAL_REPORT", "HOSPITAL_BILL", "PRESCRIPTION"),
-        "property" to setOf("PROPERTY_PAPER", "RENT_AGREEMENT", "VEHICLE_RC", "VEHICLE_INSURANCE", "UTILITY_BILL")
-    )
+    val categoryDocTypes = DocCategory.TYPES
     val initialFilterValue = initialCategory ?: "all"
 
     var activeFilter by rememberSaveable { mutableStateOf<String>(initialFilterValue) }

@@ -22,12 +22,9 @@ class MainActivity : ComponentActivity() {
         applySecureFlag()
         handle(intent)
         val container = (application as RecallApp).container
-        val emergency = intent?.getBooleanExtra(EXTRA_EMERGENCY, false) == true
-        // The Quick Settings tile may open the emergency pack over the lock screen (DECISIONS.md D-001).
-        if (emergency) setShowWhenLocked(true)
         setContent {
             CompositionLocalProvider(LocalContainer provides container) {
-                RecallTheme { RecallRoot(renewalDocId, onRenewalHandled = { renewalDocId.value = null }, startInEmergency = emergency) }
+                RecallTheme { RecallRoot(renewalDocId, onRenewalHandled = { renewalDocId.value = null }) }
             }
         }
     }
@@ -56,6 +53,5 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         const val EXTRA_RENEWAL_DOC_ID = "renewal_doc_id"
-        const val EXTRA_EMERGENCY = "emergency"
     }
 }

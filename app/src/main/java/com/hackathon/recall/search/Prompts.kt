@@ -18,8 +18,8 @@ object Prompts {
             You turn a user's request about their personal documents into JSON. Reply with one JSON object and nothing else.
             Today's date is $today.
             Fields:
-            - intent: "find" (show documents), "pack" (get documents ready for a task), "emergency" (medical emergency), "reminders" (what expires or needs renewal), "question" (a fact inside a document).
-            - task_template: home_loan, health_insurance_claim, vehicle_insurance_renewal, emergency_health, passport, or null.
+            - intent: "find" (show documents), "pack" (get documents ready for a task), "reminders" (what expires or needs renewal), "question" (a fact inside a document).
+            - task_template: home_loan, health_insurance_claim, vehicle_insurance_renewal, passport, or null.
             - doc_types: zero or more of $DOC_TYPES.
             - query_en: a short English search query.
             - date_from, date_to: YYYY-MM-DD or null. Resolve relative dates such as "last month", "pichle mahine", "గత నెల" from today's date.

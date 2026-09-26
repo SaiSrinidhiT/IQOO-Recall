@@ -72,7 +72,6 @@ fun ResultsScreen(nav: NavHostController, initialQuery: String) {
     LaunchedEffect(result) {
         when (val r = result) {
             is QueryResult.Pack -> nav.navigate(Routes.checklist(r.templateId)) { popUpTo(Routes.HOME) }
-            is QueryResult.Emergency -> nav.navigate(Routes.EMERGENCY) { popUpTo(Routes.HOME) }
             else -> {}
         }
     }

@@ -6,10 +6,8 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.hackathon.recall.actions.AadhaarMasker
-import com.hackathon.recall.actions.EmergencyMode
 import com.hackathon.recall.actions.PackBuilder
 import com.hackathon.recall.actions.ReminderScheduler
-import com.hackathon.recall.actions.Speaker
 import com.hackathon.recall.actions.TemplateCatalog
 import com.hackathon.recall.data.DocumentRepository
 import com.hackathon.recall.data.FtsIndex
@@ -66,8 +64,6 @@ class AppContainer(private val app: Application) {
     }
     val enricher by lazy { LlmEnricher(repository, models.llm, reminders) }
     val packBuilder by lazy { PackBuilder(app, repository, AadhaarMasker(ocr)) }
-    val emergency by lazy { EmergencyMode(app, repository, templates) }
-    val speaker by lazy { Speaker(app) }
     val voice by lazy { VoiceInput(app) }
     val session = VaultSession()
 

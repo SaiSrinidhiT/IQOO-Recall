@@ -25,7 +25,6 @@
     <string name="action_voice">మాట్లాడు</string>
     <string name="voice_listening">వింటోంది…</string>
     <string name="voice_unavailable">ఈ భాషకు ఆఫ్‌లైన్ వాయిస్ ఇన్‌పుట్ అందుబాటులో లేదు. టైప్ చేసి అడగవచ్చు.</string>
-    <string name="emergency_button">అత్యవసరం</string>
     <string name="packs_title">పత్రాలు సిద్ధం చేయండి</string>
     <string name="index_title">ఇండెక్స్ అవుతోంది</string>
     <string name="index_progress">%1$d పూర్తి · %2$d మిగిలినవి · సుమారు %3$d సెకన్లు</string>
@@ -107,18 +106,6 @@
     <string name="scan_not_document">ఇది పత్రంలా కనిపించడం లేదు.</string>
     <string name="camera_permission_needed">పత్రాలు స్కాన్ చేయడానికి కెమెరా అనుమతి అవసరం.</string>
 
-    <string name="emergency_title">అత్యవసర ఆరోగ్య ప్యాక్</string>
-    <string name="emergency_read_aloud">చదివి వినిపించు</string>
-    <string name="emergency_stop">ఆపు</string>
-    <string name="emergency_tts_fallback">%1$s వాయిస్ ఇన్‌స్టాల్ కాలేదు, కాబట్టి ఇంగ్లీష్‌లో చదివాం.</string>
-    <string name="emergency_tts_unavailable">ఈ ఫోన్‌లో చదివి వినిపించే సౌకర్యం అందుబాటులో లేదు.</string>
-    <string name="emergency_open_vault">పూర్తి వాల్ట్ తెరువు</string>
-    <string name="emergency_locked_note">అన్‌లాక్ చేయకుండా చూపబడింది. ఈ ఆరోగ్య ప్యాక్ మాత్రమే కనిపిస్తుంది; ఆధార్ దాచబడింది.</string>
-    <string name="emergency_missing_item">%1$s: ఇంకా సేవ్ చేయలేదు.</string>
-    <string name="emergency_item_valid_till">%1$s, %2$s వరకు చెల్లుబాటు.</string>
-    <string name="emergency_item_with_id">%1$s, నంబర్ చివరి అంకెలు %2$s.</string>
-    <string name="emergency_item">%1$s: %2$s.</string>
-    <string name="tile_label">అత్యవసర ప్యాక్</string>
 
     <string name="models_title">మోడల్స్</string>
     <string name="models_missing">పరికరంలో కొన్ని మోడల్స్ లేవు లేదా పాడయ్యాయి.</string>
@@ -149,9 +136,6 @@
     <string name="perm_partial">కొన్ని ఫోటోలు మాత్రమే</string>
     <string name="perm_denied">అనుమతి లేదు</string>
     <string name="voice_langs">ఆఫ్‌లైన్ వాయిస్ భాషలు</string>
-    <string name="tts_langs">చదివి వినిపించే వాయిస్‌లు</string>
-    <string name="lang_available">%1$s: అందుబాటులో ఉంది</string>
-    <string name="lang_unavailable">%1$s: ఇన్‌స్టాల్ కాలేదు</string>
     <string name="skipped_images">పత్రాలు కావని వదిలేసిన చిత్రాలు</string>
     <string name="action_mark_document">పత్రంగా గుర్తించు</string>
     <string name="allow_screen_capture">స్క్రీన్‌షాట్లు, స్క్రీన్ మిర్రరింగ్ అనుమతించు (డెమో కోసం)</string>
@@ -169,7 +153,6 @@
     <string name="template_home_loan">హోమ్ లోన్</string>
     <string name="template_health_insurance_claim">ఆరోగ్య బీమా క్లెయిమ్</string>
     <string name="template_vehicle_insurance_renewal">వాహన బీమా రెన్యూవల్</string>
-    <string name="template_emergency_health">అత్యవసర ఆరోగ్య ప్యాక్</string>
     <string name="template_passport">పాస్‌పోర్ట్ దరఖాస్తు</string>
     <string name="template_health_insurance_renewal">ఆరోగ్య బీమా రెన్యూవల్</string>
     <string name="template_driving_licence_renewal">డ్రైవింగ్ లైసెన్స్ రెన్యూవల్</string>

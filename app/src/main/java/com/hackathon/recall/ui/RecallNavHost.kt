@@ -11,10 +11,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -32,7 +33,6 @@ object Routes {
     const val BENCHMARK = "benchmark"
     const val SETTINGS = "settings"
     const val MODELS = "models"
-    const val EMERGENCY = "emergency"
     fun results(q: String) = "results?q=${Uri.encode(q)}"
     fun checklist(template: String, pin: Long? = null) = "checklist/$template" + (pin?.let { "?pin=$it" } ?: "")
     fun doc(id: Long) = "doc/$id"
@@ -40,24 +40,22 @@ object Routes {
     fun vaultCategory(category: String) = "vault?category=$category"
 }
 
-/**
- * Top level: wait for the encrypted vault to open, then the biometric gate, then the app. The
- * emergency pack is the one screen reachable while locked (docs/DECISIONS.md D-001).
- */
+/** Top level: wait for the encrypted vault to open, then the biometric gate, then first-run onboarding, then the app. */
 @Composable
-fun RecallRoot(renewalDocId: StateFlow<Long?>, onRenewalHandled: () -> Unit, startInEmergency: Boolean) {
+fun RecallRoot(renewalDocId: StateFlow<Long?>, onRenewalHandled: () -> Unit) {
     val container = LocalContainer.current
+    val context = LocalContext.current
     val ready by container.ready.collectAsState()
     val unlocked by container.session.unlocked.collectAsState()
-    var emergencyWhileLocked by rememberSaveable { mutableStateOf(startInEmergency) }
+    var onboarded by remember { mutableStateOf(Onboarding.completed(context)) }
 
     when {
         !ready -> Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
             CircularProgressIndicator()
             Text(stringResource(R.string.opening_vault))
         }
-        !unlocked && emergencyWhileLocked -> EmergencyScreen(locked = true, onOpenVault = { emergencyWhileLocked = false })
-        !unlocked -> LockScreen(onUnlocked = container.session::unlock, onEmergency = { emergencyWhileLocked = true })
+        !unlocked -> LockScreen(onUnlocked = container.session::unlock)
+        !onboarded -> OnboardingScreen(onDone = { onboarded = true })
         else -> {
             val nav = rememberNavController()
             RecallNav(nav)
@@ -103,6 +101,5 @@ fun RecallNav(nav: NavHostController) {
         composable(Routes.BENCHMARK) { BenchmarkScreen(nav) }
         composable(Routes.SETTINGS) { SettingsScreen(nav) }
         composable(Routes.MODELS) { ModelsScreen(nav) }
-        composable(Routes.EMERGENCY) { EmergencyScreen(locked = false, onOpenVault = { nav.popBackStack() }) }
     }
 }

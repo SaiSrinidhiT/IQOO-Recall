@@ -182,7 +182,7 @@ private suspend fun qwenJsonCheck(container: com.hackathon.recall.AppContainer):
         "show my salary slips from the last three months",
         "मेरा हेल्थ इंश्योरेंस कब खत्म हो रहा है",
         "నా కారు ఇన్సూరెన్స్ పాలసీ నంబర్ ఏంటి",
-        "emergency",
+        "what expires next month",
     )
     val today = LocalDate.now()
     val lines = ArrayList<String>()

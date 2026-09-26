@@ -8,7 +8,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeParseException
 
 enum class IntentKind(val code: String) {
-    FIND("find"), PACK("pack"), EMERGENCY("emergency"), REMINDERS("reminders"), QUESTION("question");
+    FIND("find"), PACK("pack"), REMINDERS("reminders"), QUESTION("question");
 
     companion object {
         fun fromCode(v: String?): IntentKind? = entries.firstOrNull { it.code == v?.trim()?.lowercase() }
@@ -44,13 +44,13 @@ data class QueryIntent(
 )
 
 object IntentValidator {
-    val TEMPLATES = setOf("home_loan", "health_insurance_claim", "vehicle_insurance_renewal", "emergency_health", "passport")
+    val TEMPLATES = setOf("home_loan", "health_insurance_claim", "vehicle_insurance_renewal", "passport")
 
     /** Throws [IllegalArgumentException] with a message suitable for the one retry the brief allows. */
     fun validate(raw: IntentJson, originalQuery: String, detectedLang: Lang): QueryIntent {
         val kind = IntentKind.fromCode(raw.intent)
             ?: throw IllegalArgumentException(
-                "\"intent\" must be one of find, pack, emergency, reminders, question (got ${raw.intent ?: "nothing"})",
+                "\"intent\" must be one of find, pack, reminders, question (got ${raw.intent ?: "nothing"})",
             )
         val template = clean(raw.taskTemplate)?.lowercase()?.takeIf { it in TEMPLATES }
         val parsedTypes = raw.docTypes.orEmpty().map { it to DocType.parse(it) }
@@ -61,7 +61,7 @@ object IntentValidator {
         val (from, to) = if (d1 != null && d2 != null && d1.isAfter(d2)) d2 to d1 else d1 to d2
         return QueryIntent(
             kind = if (kind == IntentKind.PACK && template == null && docTypes.isEmpty()) IntentKind.FIND else kind,
-            template = template ?: if (kind == IntentKind.EMERGENCY) "emergency_health" else null,
+            template = template,
             docTypes = docTypes,
             queryEn = clean(raw.queryEn) ?: originalQuery,
             dateFrom = from,

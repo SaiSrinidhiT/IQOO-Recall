@@ -35,16 +35,6 @@
       ]
     },
     {
-      "id": "emergency_health",
-      "title_en": "Emergency health pack",
-      "items": [
-        {"doc_type": "HEALTH_INSURANCE", "count": 1, "recency": {"rule": "not_expired"}},
-        {"doc_type": "HEALTH_ID_ABHA", "count": 1},
-        {"doc_type": "AADHAAR", "count": 1},
-        {"doc_type": "MEDICAL_REPORT", "count": 3, "min": 1, "recency": {"rule": "most_recent", "months": 12}}
-      ]
-    },
-    {
       "id": "passport",
       "title_en": "Passport application",
       "items": [

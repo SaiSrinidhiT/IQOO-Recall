@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,7 +30,7 @@ import com.hackathon.recall.R
  * all the vault can't be protected; the user is told so and may continue (docs/DECISIONS.md).
  */
 @Composable
-fun LockScreen(onUnlocked: () -> Unit, onEmergency: () -> Unit) {
+fun LockScreen(onUnlocked: () -> Unit) {
     val activity = LocalContext.current as Activity
     var error by remember { mutableStateOf<String?>(null) }
     val secure = remember { activity.getSystemService(KeyguardManager::class.java).isDeviceSecure }
@@ -57,7 +56,6 @@ fun LockScreen(onUnlocked: () -> Unit, onEmergency: () -> Unit) {
             Button(onClick = onUnlocked) { Text(stringResource(R.string.action_continue)) }
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        OutlinedButton(onClick = onEmergency) { Text(stringResource(R.string.emergency_button)) }
     }
 }
 

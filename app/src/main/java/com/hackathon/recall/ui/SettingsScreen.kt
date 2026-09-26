@@ -64,7 +64,6 @@ fun SettingsScreen(nav: NavHostController) {
     val scope = rememberCoroutineScope()
     var capture by remember { mutableStateOf(ScreenCapture.allowed(context)) }
     val voiceLangs by produceState<List<String>?>(null) { value = container.voice.installedOfflineLanguages() }
-    val ttsLangs by produceState<Map<Lang, Boolean>>(emptyMap()) { value = Lang.entries.associateWith { container.speaker.isAvailable(it) } }
     var skipped by remember { mutableStateOf<List<IndexStateRow>>(emptyList()) }
     val refreshSkipped: suspend () -> Unit = { skipped = withContext(Dispatchers.IO) { container.database.indexState().skipped(50) } }
     LaunchedEffect(Unit) { refreshSkipped() }
@@ -88,8 +87,6 @@ fun SettingsScreen(nav: NavHostController) {
 
             SectionTitle(stringResource(R.string.voice_langs))
             Text(voiceLangs?.joinToString().takeUnless { it.isNullOrEmpty() } ?: stringResource(R.string.voice_unavailable), style = MaterialTheme.typography.bodySmall)
-            SectionTitle(stringResource(R.string.tts_langs))
-            ttsLangs.forEach { (l, ok) -> Text(stringResource(if (ok) R.string.lang_available else R.string.lang_unavailable, l.englishName), style = MaterialTheme.typography.bodySmall) }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 SectionTitle(stringResource(R.string.app_language))

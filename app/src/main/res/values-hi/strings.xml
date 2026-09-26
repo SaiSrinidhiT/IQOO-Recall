@@ -25,7 +25,6 @@
     <string name="action_voice">बोलें</string>
     <string name="voice_listening">सुन रहा है…</string>
     <string name="voice_unavailable">इस भाषा के लिए ऑफ़लाइन वॉइस इनपुट उपलब्ध नहीं है। टाइप करके पूछ सकते हैं।</string>
-    <string name="emergency_button">आपातकाल</string>
     <string name="packs_title">दस्तावेज़ तैयार करें</string>
     <string name="index_title">इंडेक्स हो रहा है</string>
     <string name="index_progress">%1$d पूरे · %2$d बाकी · लगभग %3$d सेकंड</string>
@@ -107,18 +106,6 @@
     <string name="scan_not_document">यह दस्तावेज़ जैसा नहीं दिखता।</string>
     <string name="camera_permission_needed">दस्तावेज़ स्कैन करने के लिए कैमरा अनुमति चाहिए।</string>
 
-    <string name="emergency_title">आपातकालीन स्वास्थ्य पैक</string>
-    <string name="emergency_read_aloud">पढ़कर सुनाएँ</string>
-    <string name="emergency_stop">रोकें</string>
-    <string name="emergency_tts_fallback">%1$s आवाज़ इंस्टॉल नहीं है, इसलिए अंग्रेज़ी में पढ़ा गया।</string>
-    <string name="emergency_tts_unavailable">इस फ़ोन पर पढ़कर सुनाने की सुविधा उपलब्ध नहीं है।</string>
-    <string name="emergency_open_vault">पूरी तिजोरी खोलें</string>
-    <string name="emergency_locked_note">अनलॉक किए बिना दिखाया गया। केवल यह स्वास्थ्य पैक दिखता है; आधार छिपा हुआ है।</string>
-    <string name="emergency_missing_item">%1$s: अभी सहेजा नहीं गया।</string>
-    <string name="emergency_item_valid_till">%1$s, %2$s तक मान्य।</string>
-    <string name="emergency_item_with_id">%1$s, नंबर के अंतिम अंक %2$s।</string>
-    <string name="emergency_item">%1$s: %2$s।</string>
-    <string name="tile_label">आपातकालीन पैक</string>
 
     <string name="models_title">मॉडल</string>
     <string name="models_missing">डिवाइस पर कुछ मॉडल नहीं हैं या ख़राब हैं।</string>
@@ -149,9 +136,6 @@
     <string name="perm_partial">केवल कुछ फ़ोटो</string>
     <string name="perm_denied">अनुमति नहीं</string>
     <string name="voice_langs">ऑफ़लाइन आवाज़ भाषाएँ</string>
-    <string name="tts_langs">पढ़कर सुनाने वाली आवाज़ें</string>
-    <string name="lang_available">%1$s: उपलब्ध</string>
-    <string name="lang_unavailable">%1$s: इंस्टॉल नहीं</string>
     <string name="skipped_images">गैर-दस्तावेज़ मानकर छोड़ी गई तस्वीरें</string>
     <string name="action_mark_document">दस्तावेज़ मानें</string>
     <string name="allow_screen_capture">स्क्रीनशॉट और स्क्रीन मिररिंग की अनुमति दें (डेमो के लिए)</string>
@@ -169,7 +153,6 @@
     <string name="template_home_loan">होम लोन</string>
     <string name="template_health_insurance_claim">स्वास्थ्य बीमा क्लेम</string>
     <string name="template_vehicle_insurance_renewal">वाहन बीमा नवीनीकरण</string>
-    <string name="template_emergency_health">आपातकालीन स्वास्थ्य पैक</string>
     <string name="template_passport">पासपोर्ट आवेदन</string>
     <string name="template_health_insurance_renewal">स्वास्थ्य बीमा नवीनीकरण</string>
     <string name="template_driving_licence_renewal">ड्राइविंग लाइसेंस नवीनीकरण</string>

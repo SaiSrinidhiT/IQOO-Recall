@@ -48,8 +48,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.work.WorkInfo
-import androidx.work.WorkManager
 import com.hackathon.recall.R
 import com.hackathon.recall.data.type
 import com.hackathon.recall.i18n.docTypeName
@@ -83,7 +81,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material3.Surface
@@ -125,7 +122,6 @@ fun HomeScreen(nav: NavHostController) {
     val docs by container.repository.observeDocuments().collectAsState(emptyList())
     val duplicates by container.repository.observeDuplicates().collectAsState(emptyList())
     val counts by container.database.indexState().observeCounts().collectAsState(emptyList())
-    val work by WorkManager.getInstance(context).getWorkInfosForUniqueWorkFlow(IndexWorker.UNIQUE).collectAsState(emptyList())
     var access by remember { mutableStateOf(photoAccess(context)) }
     var query by rememberSaveable { mutableStateOf("") }
     var voiceLang by rememberSaveable { mutableStateOf(Lang.EN) }
@@ -134,7 +130,7 @@ fun HomeScreen(nav: NavHostController) {
 
     val photoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
         access = photoAccess(context)
-        if (access != PhotoAccess.NONE) IndexWorker.enqueue(context)
+        if (access != PhotoAccess.NONE) IndexWorker.enqueue(context, userInitiated = true)
     }
     val notifLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
     val micLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {}
@@ -242,16 +238,20 @@ fun HomeScreen(nav: NavHostController) {
                     }
                 }
 
+                item {
+                    IndexStatus(
+                        Modifier.padding(horizontal = 20.dp).padding(top = 12.dp),
+                        onCategory = { nav.navigate(Routes.vaultCategory(it)) },
+                    )
+                }
+
                 // Categories
                 item {
-                    val identityTypes = setOf("AADHAAR", "PAN", "DRIVING_LICENCE", "PASSPORT", "VOTER_ID")
-                    val incomeTypes = setOf("SALARY_SLIP", "BANK_STATEMENT", "EMPLOYMENT_LETTER", "ITR_FORM16", "LOAN_SANCTION_EMI")
-                    val healthTypes = setOf("HEALTH_ID_ABHA", "HEALTH_INSURANCE", "MEDICAL_REPORT", "HOSPITAL_BILL", "PRESCRIPTION")
-                    val propertyTypes = setOf("PROPERTY_PAPER", "RENT_AGREEMENT", "VEHICLE_RC", "VEHICLE_INSURANCE", "UTILITY_BILL")
-                    val identityCount = docs.count { it.docType in identityTypes }
-                    val incomeCount = docs.count { it.docType in incomeTypes }
-                    val healthCount = docs.count { it.docType in healthTypes }
-                    val propertyCount = docs.count { it.docType in propertyTypes }
+                    val byCategory = docs.groupingBy { DocCategory.of(it.docType) }.eachCount()
+                    val identityCount = byCategory["identity"] ?: 0
+                    val incomeCount = byCategory["income"] ?: 0
+                    val healthCount = byCategory["health"] ?: 0
+                    val propertyCount = byCategory["property"] ?: 0
 
                     Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Text("Categories", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
@@ -321,27 +321,7 @@ fun HomeScreen(nav: NavHostController) {
                     }
                 }
 
-                // Emergency Health Pack
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth().padding(20.dp).clickable { nav.navigate(Routes.EMERGENCY) },
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFDECEA)),
-                        border = BorderStroke(1.dp, Color(0xFFF9A8A2))
-                    ) {
-                        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Box(Modifier.size(36.dp).background(Color(0xFFF44336).copy(alpha=0.15f), CircleShape), contentAlignment = Alignment.Center) {
-                                Icon(Icons.Default.FavoriteBorder, contentDescription = null, tint = Color(0xFFF44336))
-                            }
-                            Spacer(Modifier.width(12.dp))
-                            Column(Modifier.weight(1f)) {
-                                Text("Emergency Health Pack", fontWeight = FontWeight.SemiBold, color = Color(0xFFC62828), style = MaterialTheme.typography.bodyMedium)
-                                Text("Quick access for medical emergencies", fontSize = 12.sp, color = Color(0xFFD32F2F))
-                            }
-                            Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                    }
-                }
+                item { Spacer(Modifier.height(20.dp)) }
 
                 // Duplicates & Permissions & Worker Info (conditionally visible to not break functionality)
                 item {

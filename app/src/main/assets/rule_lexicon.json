@@ -30,14 +30,12 @@
     "home_loan": ["home loan", "housing loan", "house loan", "ghar loan", "home lone", "loan", "lone", "ఋణం", "రుణం", "లోన్", "ఇంటి లోన్", "హోమ్ లోన్", "ఇంటి రుణం", "ऋण", "लोन", "होम लोन", "गृह ऋण", "घर का लोन"],
     "health_insurance_claim": ["claim", "insurance claim", "health claim", "mediclaim claim", "cashless", "reimbursement", "क्लेम", "दावा", "బీమా క్లెయిమ్", "క్లెయిమ్"],
     "vehicle_insurance_renewal": ["car insurance renewal", "renew car insurance", "bike insurance renewal", "renew bike insurance", "vehicle insurance renewal", "motor renewal", "गाड़ी बीमा नवीनीकरण", "కారు ఇన్సూరెన్స్ రెన్యూవల్", "బండి ఇన్సూరెన్స్ రెన్యూ"],
-    "emergency_health": ["emergency", "medical emergency", "ambulance", "accident", "icu", "आपातकाल", "इमरजेंसी", "एम्बुलेंस", "అత్యవసర", "ఎమర్జెన్సీ", "అంబులెన్స్", "ప్రమాదం"],
     "passport": ["apply passport", "passport application", "new passport", "passport renewal", "passport documents", "पासपोर्ट आवेदन", "పాస్‌పోర్ట్ దరఖాస్తు"]
   },
   "intent_words": {
     "pack": ["ready", "prepare", "keep ready", "get ready", "checklist", "documents for", "papers for", "needed for", "taiyar", "tayyar", "ready cheyyi", "ready karo", "kavali", "chahiye", "तैयार", "चाहिए", "సిద్ధం", "రెడీ", "కావాలి"],
     "reminders": ["expire", "expires", "expiry", "expiring", "expired", "renewal", "renew", "due", "valid till", "gaduvu", "samapti", "समाप्ति", "समाप्त", "नवीनीकरण", "గడువు", "రెన్యూవల్", "ముగుస్తుంది"],
-    "question": ["what is", "what's", "how much", "which", "when", "number", "amount", "kya hai", "kitna", "kitni", "kab", "kaun", "enti", "entha", "eppudu", "ekkada", "क्या है", "कितना", "कब", "ఏంటి", "ఎంత", "ఎప్పుడు", "ఏది"],
-    "emergency": ["emergency", "medical emergency", "ambulance", "accident", "आपातकाल", "इमरजेंसी", "అత్యవసర", "ఎమర్జెన్సీ"]
+    "question": ["what is", "what's", "how much", "which", "when", "number", "amount", "kya hai", "kitna", "kitni", "kab", "kaun", "enti", "entha", "eppudu", "ekkada", "क्या है", "कितना", "कब", "ఏంటి", "ఎంత", "ఎప్పుడు", "ఏది"]
   },
   "language_hints": {
     "te": {"cheyyi": 3, "cheyandi": 3, "chey": 2, "chupinchu": 3, "chupinchandi": 3, "kavali": 2, "ekkada": 2, "undi": 1.5, "unnayi": 2, "vunnayi": 2, "ledu": 1.5, "enti": 2, "entha": 2, "eppudu": 2, "naa": 1, "nenu": 2, "mee": 1, "lo": 0.5, "ivvu": 2, "ivvandi": 2, "gaduvu": 2, "jeetham": 2, "jeetam": 2, "nela": 1.5, "nelalu": 2, "ammaa": 1, "amma": 0.5, "nanna": 1, "bandi": 1, "illu": 1},
