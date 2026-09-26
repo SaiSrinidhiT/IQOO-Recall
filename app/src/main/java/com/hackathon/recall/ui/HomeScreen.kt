@@ -189,7 +189,7 @@ fun HomeScreen(nav: NavHostController) {
                 }
                 Spacer(Modifier.width(8.dp))
                 // Profile
-                Box(Modifier.size(32.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape), contentAlignment = Alignment.Center) {
+                Box(Modifier.size(32.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape).clickable { nav.navigate(Routes.SETTINGS) }, contentAlignment = Alignment.Center) {
                     Text("A", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
                 }
             }
@@ -207,7 +207,7 @@ fun HomeScreen(nav: NavHostController) {
                                 Icon(Icons.Default.Search, contentDescription = null, tint = Color.White)
                             }
                             Spacer(Modifier.width(12.dp))
-                            Text("Ask for any document…", color = Color.White.copy(alpha = 0.9f), modifier = Modifier.weight(1f))
+                            Text("Ask for any document…", color = Color.White, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
                             Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = Color.White.copy(alpha = 0.7f))
                         }
                     }
@@ -237,13 +237,22 @@ fun HomeScreen(nav: NavHostController) {
                                 Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFF4CAF50), modifier = Modifier.size(18.dp))
                             }
                             Spacer(Modifier.width(12.dp))
-                            Text("${docs.size} documents securely indexed", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
+                            Text("${docs.size} documents securely indexed", fontWeight = FontWeight.SemiBold, color = Color(0xFF2E7D32))
                         }
                     }
                 }
 
                 // Categories
                 item {
+                    val identityTypes = setOf("AADHAAR", "PAN", "DRIVING_LICENCE", "PASSPORT", "VOTER_ID")
+                    val incomeTypes = setOf("SALARY_SLIP", "BANK_STATEMENT", "EMPLOYMENT_LETTER", "ITR_FORM16", "LOAN_SANCTION_EMI")
+                    val healthTypes = setOf("HEALTH_ID_ABHA", "HEALTH_INSURANCE", "MEDICAL_REPORT", "HOSPITAL_BILL", "PRESCRIPTION")
+                    val propertyTypes = setOf("PROPERTY_PAPER", "RENT_AGREEMENT", "VEHICLE_RC", "VEHICLE_INSURANCE", "UTILITY_BILL")
+                    val identityCount = docs.count { it.docType in identityTypes }
+                    val incomeCount = docs.count { it.docType in incomeTypes }
+                    val healthCount = docs.count { it.docType in healthTypes }
+                    val propertyCount = docs.count { it.docType in propertyTypes }
+
                     Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Text("Categories", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
                         Text("See all", color = MaterialTheme.colorScheme.primary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable { nav.navigate(Routes.VAULT) })
@@ -251,39 +260,39 @@ fun HomeScreen(nav: NavHostController) {
                     // 2x2 Grid using columns/rows
                     Column(Modifier.padding(horizontal = 20.dp)) {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Card(Modifier.weight(1f).clickable { nav.navigate(Routes.VAULT) }, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+                            Card(Modifier.weight(1f).clickable { nav.navigate(Routes.vaultCategory("identity")) }, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
                                 Column(Modifier.padding(14.dp)) {
                                     Box(Modifier.size(36.dp).background(MaterialTheme.colorScheme.secondary, CircleShape), contentAlignment = Alignment.Center) { Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp)) }
                                     Spacer(Modifier.height(8.dp))
                                     Text("Identity", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodySmall)
-                                    Text("4 documents", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text("$identityCount documents", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
-                            Card(Modifier.weight(1f).clickable { nav.navigate(Routes.VAULT) }, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+                            Card(Modifier.weight(1f).clickable { nav.navigate(Routes.vaultCategory("income")) }, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
                                 Column(Modifier.padding(14.dp)) {
                                     Box(Modifier.size(36.dp).background(MaterialTheme.colorScheme.secondary, CircleShape), contentAlignment = Alignment.Center) { Icon(Icons.Default.List, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp)) }
                                     Spacer(Modifier.height(8.dp))
                                     Text("Income", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodySmall)
-                                    Text("5 documents", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text("$incomeCount documents", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
                         }
                         Spacer(Modifier.height(12.dp))
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Card(Modifier.weight(1f).clickable { nav.navigate(Routes.VAULT) }, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+                            Card(Modifier.weight(1f).clickable { nav.navigate(Routes.vaultCategory("health")) }, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
                                 Column(Modifier.padding(14.dp)) {
                                     Box(Modifier.size(36.dp).background(MaterialTheme.colorScheme.secondary, CircleShape), contentAlignment = Alignment.Center) { Icon(Icons.Default.Favorite, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp)) }
                                     Spacer(Modifier.height(8.dp))
                                     Text("Health", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodySmall)
-                                    Text("2 documents", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text("$healthCount documents", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
-                            Card(Modifier.weight(1f).clickable { nav.navigate(Routes.VAULT) }, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+                            Card(Modifier.weight(1f).clickable { nav.navigate(Routes.vaultCategory("property")) }, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
                                 Column(Modifier.padding(14.dp)) {
                                     Box(Modifier.size(36.dp).background(MaterialTheme.colorScheme.secondary, CircleShape), contentAlignment = Alignment.Center) { Icon(Icons.Default.Home, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp)) }
                                     Spacer(Modifier.height(8.dp))
                                     Text("Property", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodySmall)
-                                    Text("3 documents", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Text("$propertyCount documents", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
                         }
@@ -326,8 +335,8 @@ fun HomeScreen(nav: NavHostController) {
                             }
                             Spacer(Modifier.width(12.dp))
                             Column(Modifier.weight(1f)) {
-                                Text("Emergency Health Pack", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodyMedium)
-                                Text("Quick access for medical emergencies", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("Emergency Health Pack", fontWeight = FontWeight.SemiBold, color = Color(0xFFC62828), style = MaterialTheme.typography.bodyMedium)
+                                Text("Quick access for medical emergencies", fontSize = 12.sp, color = Color(0xFFD32F2F))
                             }
                             Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }

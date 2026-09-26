@@ -67,19 +67,32 @@ import com.hackathon.recall.i18n.docTypeName
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VaultScreen(nav: NavHostController) {
+fun VaultScreen(nav: NavHostController, initialCategory: String? = null) {
     val container = LocalContainer.current
     val context = LocalContext.current
     val docs by container.repository.observeDocuments().collectAsState(emptyList())
-    
-    var activeFilter by rememberSaveable { mutableStateOf<String>("all") }
+
+    // Map category names from HomeScreen to DocType sets
+    val categoryDocTypes = mapOf(
+        "identity" to setOf("AADHAAR", "PAN", "DRIVING_LICENCE", "PASSPORT", "VOTER_ID"),
+        "income" to setOf("SALARY_SLIP", "BANK_STATEMENT", "EMPLOYMENT_LETTER", "ITR_FORM16", "LOAN_SANCTION_EMI"),
+        "health" to setOf("HEALTH_ID_ABHA", "HEALTH_INSURANCE", "MEDICAL_REPORT", "HOSPITAL_BILL", "PRESCRIPTION"),
+        "property" to setOf("PROPERTY_PAPER", "RENT_AGREEMENT", "VEHICLE_RC", "VEHICLE_INSURANCE", "UTILITY_BILL")
+    )
+    val initialFilterValue = initialCategory ?: "all"
+
+    var activeFilter by rememberSaveable { mutableStateOf<String>(initialFilterValue) }
     var query by rememberSaveable { mutableStateOf("") }
     var view by rememberSaveable { mutableStateOf("list") } // "list" or "grid"
     
     val types = docs.map { it.type() }.distinct()
     
     val filteredDocs = docs.filter { d ->
-        val matchesCategory = activeFilter == "all" || d.docType == activeFilter
+        val matchesCategory = when {
+            activeFilter == "all" -> true
+            activeFilter in categoryDocTypes -> d.docType in (categoryDocTypes[activeFilter] ?: emptySet())
+            else -> d.docType == activeFilter
+        }
         val matchesQuery = query.isBlank() || context.docTypeName(d.type()).contains(query, ignoreCase = true) || (d.ownerName?.contains(query, ignoreCase = true) == true)
         matchesCategory && matchesQuery
     }
@@ -119,10 +132,11 @@ fun VaultScreen(nav: NavHostController) {
                     Box(Modifier.clip(RoundedCornerShape(16.dp)).background(if (isAll) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface).border(1.dp, if (isAll) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp)).clickable { activeFilter = "all" }.padding(horizontal = 16.dp, vertical = 6.dp)) {
                         Text("All", fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = if (isAll) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground)
                     }
-                    types.forEach { t ->
-                        val isSel = activeFilter == t.name
-                        Box(Modifier.clip(RoundedCornerShape(16.dp)).background(if (isSel) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface).border(1.dp, if (isSel) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp)).clickable { activeFilter = t.name }.padding(horizontal = 16.dp, vertical = 6.dp)) {
-                            Text(context.docTypeName(t), fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = if (isSel) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground)
+                    val categoryLabels = listOf("identity" to "Identity", "income" to "Income", "health" to "Health", "property" to "Property")
+                    categoryLabels.forEach { (key, label) ->
+                        val isSel = activeFilter == key
+                        Box(Modifier.clip(RoundedCornerShape(16.dp)).background(if (isSel) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface).border(1.dp, if (isSel) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(16.dp)).clickable { activeFilter = key }.padding(horizontal = 16.dp, vertical = 6.dp)) {
+                            Text(label, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = if (isSel) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground)
                         }
                     }
                 }

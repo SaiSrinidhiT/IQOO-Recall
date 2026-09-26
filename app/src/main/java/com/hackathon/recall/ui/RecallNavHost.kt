@@ -37,6 +37,7 @@ object Routes {
     fun checklist(template: String, pin: Long? = null) = "checklist/$template" + (pin?.let { "?pin=$it" } ?: "")
     fun doc(id: Long) = "doc/$id"
     fun scan(expected: String? = null) = "scan" + (expected?.let { "?expected=$it" } ?: "")
+    fun vaultCategory(category: String) = "vault?category=$category"
 }
 
 /**
@@ -90,7 +91,11 @@ fun RecallNav(nav: NavHostController) {
         composable("doc/{id}", arguments = listOf(navArgument("id") { type = NavType.LongType })) {
             DocDetailScreen(nav, it.arguments?.getLong("id") ?: -1)
         }
-        composable(Routes.VAULT) { VaultScreen(nav) }
+        composable(Routes.VAULT) { VaultScreen(nav, initialCategory = null) }
+        composable(
+            "vault?category={category}",
+            arguments = listOf(navArgument("category") { type = NavType.StringType; nullable = true; defaultValue = null }),
+        ) { VaultScreen(nav, initialCategory = it.arguments?.getString("category")) }
         composable(
             "scan?expected={expected}",
             arguments = listOf(navArgument("expected") { type = NavType.StringType; nullable = true; defaultValue = null }),

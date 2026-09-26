@@ -134,7 +134,7 @@ fun ResultsScreen(nav: NavHostController, initialQuery: String) {
             }
 
             item {
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+                Row(Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.Start) {
                     Box(Modifier.size(28.dp).background(MaterialTheme.colorScheme.secondary, CircleShape).padding(top = 4.dp), contentAlignment = Alignment.Center) {
                         Icon(Icons.Default.Star, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(14.dp))
                     }
@@ -142,17 +142,17 @@ fun ResultsScreen(nav: NavHostController, initialQuery: String) {
 
                     when (val r = result) {
                         null -> {
-                            Box(Modifier.background(MaterialTheme.colorScheme.surface, RoundedCornerShape(topStart = 4.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 16.dp)).border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(topStart = 4.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 16.dp)).padding(16.dp)) {
+                            Box(Modifier.fillMaxWidth(0.85f).background(MaterialTheme.colorScheme.surface, RoundedCornerShape(topStart = 4.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 16.dp)).border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(topStart = 4.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 16.dp)).padding(16.dp)) {
                                 CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
                             }
                         }
                         is QueryResult.Found -> {
-                            Column(Modifier.weight(1f).background(MaterialTheme.colorScheme.surface, RoundedCornerShape(topStart = 4.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 16.dp)).border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(topStart = 4.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 16.dp)).padding(16.dp)) {
+                            Column(Modifier.fillMaxWidth(0.85f).background(MaterialTheme.colorScheme.surface, RoundedCornerShape(topStart = 4.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 16.dp)).border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(topStart = 4.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 16.dp)).padding(16.dp)) {
                                 Text(r.answer.text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground)
                             }
                         }
                         is QueryResult.Reminders -> {
-                            Column(Modifier.weight(1f).background(MaterialTheme.colorScheme.surface, RoundedCornerShape(topStart = 4.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 16.dp)).border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(topStart = 4.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 16.dp)).padding(16.dp)) {
+                            Column(Modifier.fillMaxWidth(0.85f).background(MaterialTheme.colorScheme.surface, RoundedCornerShape(topStart = 4.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 16.dp)).border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(topStart = 4.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 16.dp)).padding(16.dp)) {
                                 Text("Here are your reminders.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground)
                             }
                         }
