@@ -64,6 +64,38 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material3.Surface
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.fillMaxSize
+
 enum class PhotoAccess { FULL, PARTIAL, NONE }
 
 fun photoAccess(context: Context): PhotoAccess {
@@ -125,123 +157,217 @@ fun HomeScreen(nav: NavHostController) {
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.app_name)) },
-                actions = {
-                    TextButton(onClick = { nav.navigate(Routes.VAULT) }) { Text(stringResource(R.string.action_vault)) }
-                    TextButton(onClick = { nav.navigate(Routes.BENCHMARK) }) { Text(stringResource(R.string.action_benchmark)) }
-                    TextButton(onClick = { nav.navigate(Routes.SETTINGS) }) { Text(stringResource(R.string.action_settings)) }
-                },
-            )
-        },
         snackbarHost = { SnackbarHost(snackbar) },
     ) { padding ->
-        LazyColumn(Modifier.padding(padding).padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            item {
-                OutlinedTextField(
-                    value = query,
-                    onValueChange = { query = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text(stringResource(R.string.ask_hint)) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(onSearch = { if (query.isNotBlank()) nav.navigate(Routes.results(query)) }),
-                )
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
-                    Button(onClick = { if (query.isNotBlank()) nav.navigate(Routes.results(query)) }) { Text(stringResource(R.string.action_ask)) }
-                    OutlinedButton(onClick = {
-                        if (context.checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-                            micLauncher.launch(Manifest.permission.RECORD_AUDIO)
-                            return@OutlinedButton
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+            // Header Row
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Shield Icon
+                Box(Modifier.size(32.dp).background(MaterialTheme.colorScheme.primary, RoundedCornerShape(8.dp)), contentAlignment = Alignment.Center) {
+                    Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(18.dp))
+                }
+                Spacer(Modifier.width(8.dp))
+                Column(Modifier.weight(1f)) {
+                    Text("iQOO Recall", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground)
+                    Text("English", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                // Locked chip
+                Surface(color = MaterialTheme.colorScheme.secondary, shape = CircleShape) {
+                    Row(Modifier.padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary)
+                        Spacer(Modifier.width(4.dp))
+                        Text("Locked", fontSize = 11.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+                Spacer(Modifier.width(8.dp))
+                // Profile
+                Box(Modifier.size(32.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape), contentAlignment = Alignment.Center) {
+                    Text("A", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+                }
+            }
+
+            LazyColumn(Modifier.weight(1f)) {
+                // Ask Button
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).clickable { nav.navigate(Routes.results("")) },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
+                    ) {
+                        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Box(Modifier.size(40.dp).background(Color.White.copy(alpha = 0.15f), CircleShape), contentAlignment = Alignment.Center) {
+                                Icon(Icons.Default.Search, contentDescription = null, tint = Color.White)
+                            }
+                            Spacer(Modifier.width(12.dp))
+                            Text("Ask for any document…", color = Color.White.copy(alpha = 0.9f), modifier = Modifier.weight(1f))
+                            Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = Color.White.copy(alpha = 0.7f))
                         }
-                        listening = true
-                        container.voice.start(voiceLang) { e ->
-                            when (e) {
-                                is VoiceInput.Event.Partial -> query = e.text
-                                is VoiceInput.Event.Final -> {
-                                    listening = false
-                                    query = e.text
-                                    if (e.text.isNotBlank()) nav.navigate(Routes.results(e.text))
+                    }
+                }
+                
+                // Chips
+                item {
+                    LazyRow(Modifier.padding(top = 12.dp, bottom = 16.dp), contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        val chips = listOf("Home loan documents", "Latest salary slip", "Health insurance", "Car policy expiry")
+                        items(chips) { chip ->
+                            Surface(shape = CircleShape, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant), color = MaterialTheme.colorScheme.surface, onClick = { nav.navigate(Routes.results(chip)) }) {
+                                Text(chip, fontSize = 12.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp))
+                            }
+                        }
+                    }
+                }
+
+                // Stats Card
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9)),
+                        border = BorderStroke(1.dp, Color(0xFFC8E6C9))
+                    ) {
+                        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Box(Modifier.size(36.dp).background(Color.White, CircleShape), contentAlignment = Alignment.Center) {
+                                Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFF4CAF50), modifier = Modifier.size(18.dp))
+                            }
+                            Spacer(Modifier.width(12.dp))
+                            Text("${docs.size} documents securely indexed", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground)
+                        }
+                    }
+                }
+
+                // Categories
+                item {
+                    Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Text("Categories", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
+                        Text("See all", color = MaterialTheme.colorScheme.primary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable { nav.navigate(Routes.VAULT) })
+                    }
+                    // 2x2 Grid using columns/rows
+                    Column(Modifier.padding(horizontal = 20.dp)) {
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Card(Modifier.weight(1f).clickable { nav.navigate(Routes.VAULT) }, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+                                Column(Modifier.padding(14.dp)) {
+                                    Box(Modifier.size(36.dp).background(MaterialTheme.colorScheme.secondary, CircleShape), contentAlignment = Alignment.Center) { Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp)) }
+                                    Spacer(Modifier.height(8.dp))
+                                    Text("Identity", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodySmall)
+                                    Text("4 documents", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
-                                is VoiceInput.Event.Error -> {
-                                    listening = false
-                                    scope.launch { snackbar.showSnackbar(voiceUnavailable) }
+                            }
+                            Card(Modifier.weight(1f).clickable { nav.navigate(Routes.VAULT) }, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+                                Column(Modifier.padding(14.dp)) {
+                                    Box(Modifier.size(36.dp).background(MaterialTheme.colorScheme.secondary, CircleShape), contentAlignment = Alignment.Center) { Icon(Icons.Default.List, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp)) }
+                                    Spacer(Modifier.height(8.dp))
+                                    Text("Income", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodySmall)
+                                    Text("5 documents", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
                             }
                         }
-                    }) { Text(if (listening) stringResource(R.string.voice_listening) else stringResource(R.string.action_voice)) }
-                    Lang.entries.forEach { l ->
-                        FilterChip(selected = voiceLang == l, onClick = { voiceLang = l }, label = { Text(l.code.uppercase()) })
+                        Spacer(Modifier.height(12.dp))
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Card(Modifier.weight(1f).clickable { nav.navigate(Routes.VAULT) }, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+                                Column(Modifier.padding(14.dp)) {
+                                    Box(Modifier.size(36.dp).background(MaterialTheme.colorScheme.secondary, CircleShape), contentAlignment = Alignment.Center) { Icon(Icons.Default.Favorite, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp)) }
+                                    Spacer(Modifier.height(8.dp))
+                                    Text("Health", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodySmall)
+                                    Text("2 documents", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
+                            Card(Modifier.weight(1f).clickable { nav.navigate(Routes.VAULT) }, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+                                Column(Modifier.padding(14.dp)) {
+                                    Box(Modifier.size(36.dp).background(MaterialTheme.colorScheme.secondary, CircleShape), contentAlignment = Alignment.Center) { Icon(Icons.Default.Home, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp)) }
+                                    Spacer(Modifier.height(8.dp))
+                                    Text("Property", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodySmall)
+                                    Text("3 documents", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Upcoming
+                item {
+                    val expiring = docs.filter { it.expiryOn != null }.sortedBy { it.expiryOn }.take(2)
+                    if (expiring.isNotEmpty()) {
+                        Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                            Text("Upcoming", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
+                        }
+                        Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            expiring.forEach { d ->
+                                Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+                                    Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        Box(Modifier.size(10.dp).background(Color(0xFFF44336), CircleShape))
+                                        Spacer(Modifier.width(12.dp))
+                                        Text(context.docTypeName(d.type()), modifier = Modifier.weight(1f), fontWeight = FontWeight.Medium, style = MaterialTheme.typography.bodySmall)
+                                        Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Emergency Health Pack
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(20.dp).clickable { nav.navigate(Routes.EMERGENCY) },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFDECEA)),
+                        border = BorderStroke(1.dp, Color(0xFFF9A8A2))
+                    ) {
+                        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Box(Modifier.size(36.dp).background(Color(0xFFF44336).copy(alpha=0.15f), CircleShape), contentAlignment = Alignment.Center) {
+                                Icon(Icons.Default.FavoriteBorder, contentDescription = null, tint = Color(0xFFF44336))
+                            }
+                            Spacer(Modifier.width(12.dp))
+                            Column(Modifier.weight(1f)) {
+                                Text("Emergency Health Pack", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodyMedium)
+                                Text("Quick access for medical emergencies", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                            Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
+
+                // Duplicates & Permissions & Worker Info (conditionally visible to not break functionality)
+                item {
+                    if (access != PhotoAccess.FULL) {
+                        Card(Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
+                            Column(Modifier.padding(12.dp)) {
+                                Text(stringResource(if (access == PhotoAccess.PARTIAL) R.string.index_partial_access else R.string.grant_photos))
+                                TextButton(onClick = { photoLauncher.launch(photoPermissions()) }) {
+                                    Text(stringResource(if (access == PhotoAccess.PARTIAL) R.string.action_change_access else R.string.action_grant))
+                                }
+                            }
+                        }
                     }
                 }
             }
-            item {
+
+            // Bottom elements
+            Column(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background)) {
+                Row(Modifier.fillMaxWidth().padding(bottom = 12.dp), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.CheckCircle, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(Modifier.width(6.dp))
+                    Text("On-device AI • No cloud", fontSize = 11.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
                 Button(
-                    onClick = { nav.navigate(Routes.EMERGENCY) },
-                    modifier = Modifier.fillMaxWidth().height(56.dp).padding(top = 4.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-                ) { Text(stringResource(R.string.emergency_button), style = MaterialTheme.typography.titleMedium) }
-            }
-            if (access != PhotoAccess.FULL) item {
-                Card(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(12.dp)) {
-                        Text(stringResource(if (access == PhotoAccess.PARTIAL) R.string.index_partial_access else R.string.grant_photos))
-                        TextButton(onClick = { photoLauncher.launch(photoPermissions()) }) {
-                            Text(stringResource(if (access == PhotoAccess.PARTIAL) R.string.action_change_access else R.string.action_grant))
-                        }
-                    }
+                    onClick = { nav.navigate(Routes.scan()) },
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 20.dp).height(48.dp),
+                    shape = CircleShape,
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onBackground),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+                ) {
+                    Icon(Icons.Default.AddCircle, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Scan a new document")
                 }
             }
-            item {
-                val running = work.firstOrNull { it.state == WorkInfo.State.RUNNING }
-                Card(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(12.dp)) {
-                        if (running != null) {
-                            val done = running.progress.getInt(IndexWorker.KEY_DONE, 0)
-                            val left = running.progress.getInt(IndexWorker.KEY_REMAINING, counts.firstOrNull { it.status == "pending" }?.n ?: 0)
-                            val eta = running.progress.getLong(IndexWorker.KEY_ETA_SEC, 0)
-                            Text(stringResource(R.string.index_title), style = MaterialTheme.typography.titleSmall)
-                            Text(stringResource(R.string.index_progress, done, left, eta.toInt()))
-                            LinearProgressIndicator(progress = { if (done + left == 0) 0f else done / (done + left).toFloat() }, modifier = Modifier.fillMaxWidth())
-                        } else {
-                            Text(stringResource(R.string.index_idle, docs.size))
-                        }
-                    }
-                }
-            }
-            items(duplicates, key = { "dup-${it.id}" }) { dup ->
-                val original = docs.firstOrNull { it.id == dup.dupOfDocId }
-                Card(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(12.dp)) {
-                        Text(stringResource(R.string.duplicate_banner, context.docTypeName(dup.type()), original?.let { LocalDate.ofEpochDay(it.createdAt / 86_400_000).toString() } ?: "?"))
-                        Row {
-                            TextButton(onClick = { scope.launch { container.repository.resolveDuplicate(dup.id, keepBoth = true) } }) { Text(stringResource(R.string.action_keep_both)) }
-                            TextButton(onClick = { scope.launch { container.repository.resolveDuplicate(dup.id, keepBoth = false) } }) { Text(stringResource(R.string.action_replace)) }
-                        }
-                    }
-                }
-            }
-            item {
-                SectionTitle(stringResource(R.string.packs_title))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf("home_loan", "health_insurance_claim", "vehicle_insurance_renewal").forEach { t ->
-                        AssistChip(onClick = { nav.navigate(Routes.checklist(t)) }, label = { Text(context.templateName(t)) })
-                    }
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
-                    OutlinedButton(onClick = { nav.navigate(Routes.scan()) }) { Text(stringResource(R.string.action_scan)) }
-                    OutlinedButton(onClick = { pdfLauncher.launch(arrayOf("application/pdf")) }) { Text(stringResource(R.string.action_add_pdf)) }
-                }
-            }
-            val expiring = docs.filter { it.expiryOn != null }.sortedBy { it.expiryOn }.take(5)
-            if (expiring.isNotEmpty()) {
-                item { SectionTitle(stringResource(R.string.expiring_title)) }
-                items(expiring, key = { "exp-${it.id}" }) { d -> DocRow(d, onClick = { nav.navigate(Routes.doc(d.id)) }) }
-            }
-            item { SectionTitle(stringResource(R.string.recent_title)) }
-            if (docs.isEmpty()) item { Text(stringResource(R.string.empty_vault), color = MaterialTheme.colorScheme.onSurfaceVariant) }
-            items(docs.take(30), key = { it.id }) { d -> DocRow(d, onClick = { nav.navigate(Routes.doc(d.id)) }) }
         }
     }
 }
