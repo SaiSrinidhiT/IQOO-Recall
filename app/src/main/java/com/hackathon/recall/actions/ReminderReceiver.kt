@@ -85,6 +85,12 @@ object ReminderNotifier {
         val name = context.docTypeName(doc.effectiveType())
         val title = if (offset > 0) context.resources.getQuantityString(R.plurals.expires_in_days, offset, name, offset)
         else context.getString(R.string.reminder_test_title, name)
+        // On a locked screen show only that a reminder exists, not which document ("Medical report expires…").
+        val public = NotificationCompat.Builder(context, CHANNEL)
+            .setSmallIcon(R.drawable.ic_stat_recall)
+            .setContentTitle(context.getString(R.string.app_name))
+            .setContentText(context.getString(R.string.reminder_body))
+            .build()
         val notification = NotificationCompat.Builder(context, CHANNEL)
             .setSmallIcon(R.drawable.ic_stat_recall)
             .setContentTitle(title)
@@ -92,6 +98,8 @@ object ReminderNotifier {
             .setContentIntent(tap)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+            .setPublicVersion(public)
             .build()
         NotificationManagerCompat.from(context).notify(reminderId.toInt(), notification)
     }

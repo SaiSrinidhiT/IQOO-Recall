@@ -98,7 +98,9 @@ import com.hackathon.recall.i18n.docTypeName
 import com.hackathon.recall.i18n.templateName
 import com.hackathon.recall.model.DocType
 import com.hackathon.recall.search.OwnerIntent
-import com.hackathon.recall.search.PreviousFind
+import com.hackathon.recall.search.ChatContext
+import com.hackathon.recall.search.DocAction
+import com.hackathon.recall.search.FoundNote
 import com.hackathon.recall.search.QueryResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -182,9 +184,7 @@ fun ResultsScreen(nav: NavHostController, initialQuery: String) {
         // Captured before the new turn is appended: what the previous reply showed, so a rejection of
         // it ("this is not the salary slip") or a repeat of the same request excludes those documents
         // instead of deterministically finding them again.
-        val previousFind = (turns.lastOrNull()?.result as? QueryResult.Found)?.let { found ->
-            PreviousFind(found.intent.docTypes, found.hits.map { it.doc.id }.toSet())
-        }
+        val context = turns.lastOrNull()?.let { previous -> chatContext(previous.query, previous.result, currentDocs) }
         val id = (turns.lastOrNull()?.id ?: 0) + 1
         val conversation = state.chatId
         turns += Turn(id, query)
@@ -198,7 +198,7 @@ fun ResultsScreen(nav: NavHostController, initialQuery: String) {
                 }
             }
             val result = runCatching {
-                withContext(Dispatchers.Default) { container.queryEngine.ask(query, ownerFilter = ownerFilter, previousFind = previousFind, onToken = onToken) }
+                withContext(Dispatchers.Default) { container.queryEngine.ask(query, ownerFilter = ownerFilter, context = context, onToken = onToken) }
             }
             val i = turns.indexOfFirst { it.id == id }
             if (i >= 0) turns[i] = turns[i].copy(result = result.getOrNull(), failed = result.isFailure)
@@ -429,7 +429,7 @@ private fun AssistantReply(
             val cited = result.answer.citedDocIds.toSet()
             val hits = currentMatches(result.hits.sortedByDescending { it.doc.id in cited }.map { it.doc }, result.intent.docTypes, current)
             if (hits.isEmpty()) {
-                if (result.excludedPrevious) {
+                if (result.note != FoundNote.NONE) {
                     // The document exists and was already shown or rejected; offering to scan it again
                     // would be wrong, so say plainly there is nothing else, not that nothing was found.
                     Reply(result.answer.text)
@@ -439,7 +439,8 @@ private fun AssistantReply(
                 }
             } else {
                 if (result.answer.text.isNotBlank()) Reply(result.answer.text)
-                val wantsPdf = turn.query.contains("pdf", ignoreCase = true) || turn.query.contains("पीडीएफ") || turn.query.contains("పీడీఎఫ్")
+                val wantsPdf = result.intent.action == DocAction.SHARE ||
+                    turn.query.contains("pdf", ignoreCase = true) || turn.query.contains("पीडीएफ") || turn.query.contains("పీడీఎఫ్")
                 hits.forEachIndexed { i, doc ->
                     DocResultCard(doc, sharing = sharingId == doc.id, primaryShare = wantsPdf && i == 0, onOpen = { onOpen(doc) }, onShare = { onShare(doc) })
                 }
@@ -613,3 +614,21 @@ private fun suggestions(context: Context, docs: List<DocumentEntity>): List<Stri
 
 /** Thumbnails shown in a chat reply; "See all" opens the full category. */
 private const val CHAT_PHOTOS = 9
+
+/**
+ * What the previous reply showed, in the order it showed it, so the next message can say "it",
+ * "the second one" or "another one". Only document replies count; documents deleted or retyped since
+ * drop out, as they do on screen.
+ */
+internal fun chatContext(query: String, result: QueryResult?, current: Map<Long, DocumentEntity>): ChatContext? {
+    val (types, shown) = when (result) {
+        is QueryResult.Found -> {
+            val cited = result.answer.citedDocIds.toSet()
+            result.intent.docTypes to currentMatches(result.hits.sortedByDescending { it.doc.id in cited }.map { it.doc }, result.intent.docTypes, current)
+        }
+        is QueryResult.Reminders -> result.intent.docTypes to currentMatches(result.docs, result.intent.docTypes, current)
+        else -> return null
+    }
+    if (shown.isEmpty()) return null
+    return ChatContext(query, types.ifEmpty { shown.map { it.effectiveType() }.distinct() }, shown)
+}

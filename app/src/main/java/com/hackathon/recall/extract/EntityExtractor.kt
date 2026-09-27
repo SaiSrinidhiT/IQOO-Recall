@@ -103,6 +103,16 @@ object EntityExtractor {
 
     fun maskAadhaar(digits: String): String = "XXXX XXXX " + digits.takeLast(4)
 
+    /**
+     * [text] with every Verhoeff-valid Aadhaar number replaced by its masked form, for anything shown
+     * as free text (chat answers): the full number stays only inside the document itself. Other
+     * 12-digit numbers (account numbers) fail the checksum and are left as they are.
+     */
+    fun maskAadhaarIn(text: String): String = AADHAAR.replace(text) { m ->
+        val digits = DigitNormalizer.normalize(m.groupValues[1] + m.groupValues[2] + m.groupValues[3])
+        if (Verhoeff.isValidAadhaar(digits)) maskAadhaar(digits) else m.value
+    }
+
     /** All Verhoeff-valid Aadhaar numbers in [text] (digits only). */
     fun aadhaarNumbers(text: String): List<String> =
         AADHAAR.findAll(DigitNormalizer.normalize(text))

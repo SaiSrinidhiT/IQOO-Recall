@@ -225,4 +225,18 @@
         <item quantity="other">%1$d फ़ोटो</item>
     </plurals>
     <string name="chat_photos_none">%1$s: कोई फ़ोटो नहीं मिली। सिर्फ़ स्कैन हो चुकी फ़ोटो खोजी जा सकती हैं, और जगह के लिए फ़ोटो में लोकेशन होनी चाहिए।</string>
+    <string name="answer_one_doc">यह रहा आपका %1$s।</string>
+    <string name="answer_count">%1$s: %2$d सेव हैं।</string>
+    <string name="answer_count_owners">%1$s: %2$d सेव हैं (%3$s)।</string>
+    <string name="answer_showing_latest">सबसे नए %1$d दिखा रहा हूँ।</string>
+    <string name="answer_showing_oldest">सबसे पुराने %1$d दिखा रहा हूँ।</string>
+    <string name="answer_overview">आपके पास %1$d दस्तावेज़ हैं: %2$s।</string>
+    <string name="answer_overview_excluding">%1$s छोड़कर।</string>
+    <string name="answer_unclear">मुझे समझ नहीं आया कि आप कौन सा दस्तावेज़ चाहते हैं। \"मेरा PAN कार्ड दिखाओ\" या \"इस महीने क्या खत्म हो रहा है?\" पूछकर देखें।</string>
+    <string name="action_note_share">भेजने के लिए %1$s दबाएँ; PDF में आधार नंबर छिपे रहते हैं।</string>
+    <string name="action_note_delete">गलती से कुछ न मिटे, इसलिए मैं चैट से दस्तावेज़ नहीं हटाता। इसे खोलें और %1$s दबाएँ।</string>
+    <string name="action_note_edit">इसका प्रकार या यह किसका है, बदलने के लिए इसे खोलें।</string>
+    <string name="action_note_advice">मैं ऑफ़लाइन प्रक्रिया नहीं देख सकता, पर यह रही इस फ़ोन में सेव कॉपी।</string>
+    <string name="action_note_advice_none">मैं ऑफ़लाइन प्रक्रिया नहीं देख सकता, और इस फ़ोन में अभी कोई %1$s सेव नहीं है।</string>
+    <string name="chat_reply_privacy">सब कुछ इसी फ़ोन पर रहता है: दस्तावेज़ एन्क्रिप्टेड हैं, AI फ़ोन पर ही चलता है, और ऐप को इंटरनेट की अनुमति नहीं है, इसलिए कुछ भी अपलोड नहीं होता।</string>
 </resources>

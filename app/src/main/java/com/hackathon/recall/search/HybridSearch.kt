@@ -40,6 +40,8 @@ class HybridSearch(private val repo: DocumentRepository, private val models: Mod
             // Asked for a type: only confident documents of that type. Keyword or meaning matches of other
             // types (a salary slip mentioning "PAN") and unsure guesses were what put wrong cards in answers.
             if (intent.docTypes.isNotEmpty() && doc.effectiveType() !in intent.docTypes) return@mapNotNull null
+            // "Everything except Aadhaar": a ruled-out type never appears, however well it matches the words.
+            if (doc.effectiveType() in intent.excludeTypes) return@mapNotNull null
             // Otherwise a document must match by keyword, or by meaning strongly enough to stand on its own.
             val relevant = id in keywordSet || id in typeSet || (cosine[id] ?: 0f) >= maxOf(minCos, SEMANTIC_ONLY_MIN)
             if (!relevant) return@mapNotNull null

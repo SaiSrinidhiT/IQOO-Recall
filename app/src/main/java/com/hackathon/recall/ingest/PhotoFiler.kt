@@ -16,7 +16,6 @@ import com.hackathon.recall.ml.ModelManager
 import com.hackathon.recall.ml.PhotoCategorizer
 import com.hackathon.recall.ml.VectorMath
 import com.hackathon.recall.model.PhotoCategory
-import java.io.ByteArrayInputStream
 
 /**
  * Files every scanned gallery photo under a personal category (brief: Screenshots, Selfies, People,
@@ -31,14 +30,12 @@ class PhotoFiler(
     private val repo: DocumentRepository,
     private val places: PlaceIndex?,
 ) {
-    /** Full-resolution bytes with GPS intact when the user allowed media location, else the redacted copy. */
-    fun readBytes(uri: Uri): ByteArray? {
-        if (canReadLocation()) {
-            runCatching { context.contentResolver.openInputStream(MediaStore.setRequireOriginal(uri))?.use { it.readBytes() } }
-                .getOrNull()?.let { return it }
-        }
-        return context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
-    }
+    /**
+     * The photo as MediaStore hands it to apps, with its location redacted. This is what the ingest pipeline
+     * hashes, OCRs and copies into the vault: a document's saved copy must not carry where it was taken.
+     * Location is read separately, only for trip grouping ([latLon]).
+     */
+    fun readBytes(uri: Uri): ByteArray? = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
 
     private fun canReadLocation() =
         context.checkSelfPermission(Manifest.permission.ACCESS_MEDIA_LOCATION) == PackageManager.PERMISSION_GRANTED
@@ -52,7 +49,7 @@ class PhotoFiler(
         val screenshot = relativePath?.lowercase()?.contains("screenshot") == true
         val faces = if (doc == null && !screenshot && PhotoCategorizer.needsFaceCheck(probs)) countFaces(bytes) else null
         val decision = PhotoCategorizer.decide(doc != null, doc?.effectiveType(), doc?.docTypeConfidence ?: 0f, relativePath, probs, faces)
-        val gps = latLon(bytes)
+        val gps = latLon(uri)
         db.photos().upsert(
             PhotoRow(
                 uri = uri, category = decision.category.db, confidence = decision.confidence, takenAt = takenAt,
@@ -73,12 +70,21 @@ class PhotoFiler(
         try { models.faces.count(bmp) } finally { bmp.recycle() }
     }.getOrNull()
 
-    /** EXIF GPS; float precision (a few metres) is plenty for trips. Redacted copies read as 0,0 and are dropped. */
+    /**
+     * EXIF GPS from the unredacted original, when the user allowed media location. Only the EXIF header is
+     * parsed and only the coordinates are kept (in the encrypted database); the original's bytes go nowhere.
+     * Float precision (a few metres) is plenty for trips; 0,0 means redacted or absent and is dropped.
+     */
     @Suppress("DEPRECATION")
-    private fun latLon(bytes: ByteArray): Pair<Double, Double>? = runCatching {
-        val out = FloatArray(2)
-        if (ExifInterface(ByteArrayInputStream(bytes)).getLatLong(out)) out[0].toDouble() to out[1].toDouble() else null
-    }.getOrNull()?.takeIf { it.first != 0.0 || it.second != 0.0 }
+    private fun latLon(uri: String): Pair<Double, Double>? {
+        if (!canReadLocation()) return null
+        return runCatching {
+            context.contentResolver.openInputStream(MediaStore.setRequireOriginal(Uri.parse(uri)))?.use { stream ->
+                val out = FloatArray(2)
+                if (ExifInterface(stream).getLatLong(out)) out[0].toDouble() to out[1].toDouble() else null
+            }
+        }.getOrNull()?.takeIf { it.first != 0.0 || it.second != 0.0 }
+    }
 
     /** Re-groups every geotagged photo into trips. Cheap: pure arithmetic over a few thousand points. */
     suspend fun regroupTrips(): Int {

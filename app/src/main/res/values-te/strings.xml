@@ -225,4 +225,18 @@
         <item quantity="other">%1$d ఫోటోలు</item>
     </plurals>
     <string name="chat_photos_none">%1$s: ఫోటోలు దొరకలేదు. స్కాన్ అయిన ఫోటోలే వెతకగలం, ప్రదేశం కోసం ఫోటోలో లొకేషన్ ఉండాలి.</string>
+    <string name="answer_one_doc">ఇదిగో మీ %1$s.</string>
+    <string name="answer_count">%1$s: %2$d సేవ్ అయ్యాయి.</string>
+    <string name="answer_count_owners">%1$s: %2$d సేవ్ అయ్యాయి (%3$s).</string>
+    <string name="answer_showing_latest">తాజావి %1$d చూపిస్తున్నాను.</string>
+    <string name="answer_showing_oldest">పాతవి %1$d చూపిస్తున్నాను.</string>
+    <string name="answer_overview">మీ దగ్గర %1$d పత్రాలు ఉన్నాయి: %2$s.</string>
+    <string name="answer_overview_excluding">%1$s కాకుండా.</string>
+    <string name="answer_unclear">మీరు ఏ పత్రం గురించి అడుగుతున్నారో అర్థం కాలేదు. \"నా PAN కార్డ్ చూపించు\" లేదా \"ఈ నెల ఏవి గడువు ముగుస్తాయి?\" అని అడగండి.</string>
+    <string name="action_note_share">పంపడానికి %1$s నొక్కండి; PDFలో ఆధార్ నంబర్ దాచబడుతుంది.</string>
+    <string name="action_note_delete">పొరపాటున ఏదీ పోకుండా, చాట్ నుండి నేను పత్రాలను తొలగించను. దాన్ని తెరిచి %1$s నొక్కండి.</string>
+    <string name="action_note_edit">దాని రకం లేదా అది ఎవరిదో మార్చడానికి దాన్ని తెరవండి.</string>
+    <string name="action_note_advice">ఆఫ్‌లైన్‌లో ప్రక్రియలు చూడలేను, కానీ ఈ ఫోన్‌లో సేవ్ అయిన కాపీ ఇదిగో.</string>
+    <string name="action_note_advice_none">ఆఫ్‌లైన్‌లో ప్రక్రియలు చూడలేను, ఈ ఫోన్‌లో ఇంకా %1$s సేవ్ కాలేదు.</string>
+    <string name="chat_reply_privacy">అంతా ఈ ఫోన్‌లోనే ఉంటుంది: మీ పత్రాలు ఎన్‌క్రిప్ట్ అయ్యాయి, AI ఫోన్‌లోనే నడుస్తుంది, యాప్‌కు ఇంటర్నెట్ అనుమతి లేదు కాబట్టి ఏదీ అప్‌లోడ్ కాదు.</string>
 </resources>

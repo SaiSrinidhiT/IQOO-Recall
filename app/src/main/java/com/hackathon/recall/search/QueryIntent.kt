@@ -22,6 +22,22 @@ enum class IntentKind(val code: String) {
     }
 }
 
+/** What the user wants done with the documents, beyond seeing them. Only [SHARE] is done from chat. */
+enum class DocAction(val code: String) {
+    SHARE("share"),
+    /** Deleting, renaming or retyping happen on the document's own screen, never from a chat message. */
+    DELETE("delete"), EDIT("edit"),
+    /** "I lost my Aadhaar, what should I do?": the app can't look procedures up offline; it shows the saved copy. */
+    ADVICE("advice");
+
+    companion object {
+        fun fromCode(v: String?): DocAction? = entries.firstOrNull { it.code == v?.trim()?.lowercase() }
+    }
+}
+
+/** Newest first unless the user asks for the oldest or first one. */
+enum class SortOrder { LATEST, OLDEST }
+
 /** Raw shape of the intent JSON the LLM returns (brief §6.1). Everything is optional until validated. */
 @Serializable
 data class IntentJson(
@@ -34,6 +50,11 @@ data class IntentJson(
     @SerialName("answer_language") val answerLanguage: String? = null,
     val question: String? = null,
     @SerialName("photo_category") val photoCategory: String? = null,
+    @SerialName("exclude_doc_types") val excludeDocTypes: List<String>? = null,
+    val action: String? = null,
+    val order: String? = null,
+    @SerialName("follow_up") val followUp: Boolean? = null,
+    @SerialName("list_all") val listAll: Boolean? = null,
 )
 
 data class QueryIntent(
@@ -51,6 +72,14 @@ data class QueryIntent(
     val droppedDocTypes: List<String> = emptyList(),
     /** For [IntentKind.PHOTOS]: which gallery category. */
     val photoCategory: PhotoCategory? = null,
+    /** Types the user ruled out: "everything except Aadhaar", "not my PAN, my Aadhaar". */
+    val excludeTypes: List<DocType> = emptyList(),
+    val action: DocAction? = null,
+    val order: SortOrder = SortOrder.LATEST,
+    /** The message is about the previous reply's documents ("when does it expire?"), not a new search. */
+    val followUp: Boolean = false,
+    /** "What documents do I have", "everything except Aadhaar": an overview of the vault, not a search. */
+    val listAll: Boolean = false,
 )
 
 object IntentValidator {
@@ -66,7 +95,9 @@ object IntentValidator {
             )
         val template = clean(raw.taskTemplate)?.lowercase()?.takeIf { it in TEMPLATES }
         val parsedTypes = raw.docTypes.orEmpty().map { it to DocType.parse(it) }
-        val docTypes = parsedTypes.mapNotNull { it.second }.distinct()
+        val excluded = raw.excludeDocTypes.orEmpty().mapNotNull { DocType.parse(it) }.distinct()
+        // A type can't be both wanted and ruled out; ruling out wins, as it is the more deliberate statement.
+        val docTypes = parsedTypes.mapNotNull { it.second }.distinct().filterNot { it in excluded }
         val dropped = parsedTypes.filter { it.second == null }.map { it.first }
         val d1 = date(raw.dateFrom)
         val d2 = date(raw.dateTo)
@@ -92,6 +123,11 @@ object IntentValidator {
             source = "llm",
             droppedDocTypes = dropped,
             photoCategory = photoCategory.takeIf { resolved == IntentKind.PHOTOS },
+            excludeTypes = excluded,
+            action = DocAction.fromCode(raw.action),
+            order = if (clean(raw.order)?.lowercase() == "oldest") SortOrder.OLDEST else SortOrder.LATEST,
+            followUp = raw.followUp == true,
+            listAll = raw.listAll == true || (resolved == IntentKind.FIND && docTypes.isEmpty() && excluded.isNotEmpty()),
         )
     }
 

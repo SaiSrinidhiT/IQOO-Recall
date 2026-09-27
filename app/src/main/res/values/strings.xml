@@ -322,4 +322,18 @@
         <item quantity="other">%1$d photos</item>
     </plurals>
     <string name="chat_photos_none">%1$s: no photos found. Only photos the scan has filed can be searched, and places need the photo\'s location.</string>
+    <string name="answer_one_doc">Here is your %1$s.</string>
+    <string name="answer_count">%1$s: %2$d saved.</string>
+    <string name="answer_count_owners">%1$s: %2$d saved (%3$s).</string>
+    <string name="answer_showing_latest">Showing the latest %1$d.</string>
+    <string name="answer_showing_oldest">Showing the oldest %1$d.</string>
+    <string name="answer_overview">You have %1$d documents: %2$s.</string>
+    <string name="answer_overview_excluding">Leaving out %1$s.</string>
+    <string name="answer_unclear">I\'m not sure which document you mean. Try \"Show my PAN card\" or \"What expires this month?\"</string>
+    <string name="action_note_share">Tap %1$s to send it; Aadhaar numbers are masked in the PDF.</string>
+    <string name="action_note_delete">I don\'t delete documents from chat, so nothing is lost by mistake. Open it and tap %1$s.</string>
+    <string name="action_note_edit">Open it to change its type or who it belongs to.</string>
+    <string name="action_note_advice">I can\'t look up procedures offline, but here is the copy saved on this phone.</string>
+    <string name="action_note_advice_none">I can\'t look up procedures offline, and there\'s no %1$s saved on this phone yet.</string>
+    <string name="chat_reply_privacy">Everything stays on this phone: your documents are encrypted, the AI runs on-device, and the app has no internet permission, so nothing is uploaded.</string>
 </resources>

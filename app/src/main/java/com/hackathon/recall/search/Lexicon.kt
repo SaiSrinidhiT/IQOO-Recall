@@ -18,6 +18,15 @@ data class Lexicon(
     @SerialName("photo_categories") val photoCategories: Map<String, List<String>> = emptyMap(),
     /** Phrases that reject the previous reply ("that's not it", "wrong one"), keyed just "correction". */
     @SerialName("correction_words") val correctionWords: Map<String, List<String>> = emptyMap(),
+    /** "before" cues rule out the document named after them ("except Aadhaar"); "after" cues the one before ("Aadhaar kakunda"). */
+    @SerialName("negation_words") val negationWords: Map<String, List<String>> = emptyMap(),
+    /** DocAction code → verbs asking for it ("email my salary slip" → share). */
+    @SerialName("action_words") val actionWords: Map<String, List<String>> = emptyMap(),
+    @SerialName("order_words") val orderWords: Map<String, List<String>> = emptyMap(),
+    /** "what documents do I have", "show everything": a list of everything, not a search. */
+    @SerialName("overview_words") val overviewWords: Map<String, List<String>> = emptyMap(),
+    /** Pronouns, ordinals and follow-up verbs that point at the previous reply's documents. */
+    @SerialName("follow_up_words") val followUpWords: Map<String, List<String>> = emptyMap(),
 ) {
     companion object {
         fun parse(json: String): Lexicon = LlmJson.json.decodeFromString(serializer(), json)

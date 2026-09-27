@@ -3,6 +3,7 @@ package com.hackathon.recall.ui
 import com.hackathon.recall.data.DocumentEntity
 import com.hackathon.recall.data.DocumentRepository
 import com.hackathon.recall.data.effectiveType
+import com.hackathon.recall.extract.EntityExtractor
 import com.hackathon.recall.data.KvRow
 import com.hackathon.recall.data.RecallDb
 import com.hackathon.recall.model.DocType
@@ -111,7 +112,8 @@ object ChatHistory {
             "chat" -> QueryResult.Chat(intent(IntentKind.CHAT), turn.text, "history")
             "found" -> QueryResult.Found(
                 intent(IntentKind.FIND),
-                Answer(turn.text, turn.citedIds.filter { id -> docs.any { it.id == id } }, "history"),
+                // Chats saved before answers were masked still hold full Aadhaar numbers; mask them on the way out.
+                Answer(EntityExtractor.maskAadhaarIn(turn.text), turn.citedIds.filter { id -> docs.any { it.id == id } }, "history"),
                 docs.map { HybridSearch.Hit(it, 0.0, null, false) },
             )
             "pack" -> turn.templateId?.let { QueryResult.Pack(intent(IntentKind.PACK), it) }

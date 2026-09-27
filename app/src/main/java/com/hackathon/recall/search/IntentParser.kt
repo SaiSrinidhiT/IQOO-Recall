@@ -8,7 +8,8 @@ import java.time.LocalDate
 
 /** Intent parse (brief §6.1): Qwen with JSON validation and one retry, else [RuleFallbackParser]. */
 class IntentParser(private val llm: GenieXQwen, private val rules: RuleFallbackParser) {
-    suspend fun parse(query: String, today: LocalDate = LocalDate.now(), useLlm: Boolean = true): QueryIntent {
+    /** [context] describes the previous reply (see [ChatContext.describe]), so Qwen can resolve "it" and "that one". */
+    suspend fun parse(query: String, today: LocalDate = LocalDate.now(), useLlm: Boolean = true, context: String? = null): QueryIntent {
         val q = query.trim().take(MAX_QUERY_CHARS)
         val detected = rules.detectLanguage(q)
         // Rules first: when the lexicon already recognises what is asked for (a document type, a task,
@@ -20,7 +21,8 @@ class IntentParser(private val llm: GenieXQwen, private val rules: RuleFallbackP
             val start = System.nanoTime()
             try {
                 val intent = withTimeout(TIMEOUT_MS) {
-                    llm.askJson(Prompts.intentSystem(today), q, 200, { LlmJson.decode<IntentJson>(it) }) { IntentValidator.validate(it, q, detected) }
+                    val user = if (context == null) q else "Earlier in this chat:\n$context\n\nNew message: $q"
+                    llm.askJson(Prompts.intentSystem(today), user, 200, { LlmJson.decode<IntentJson>(it) }) { IntentValidator.validate(it, q, detected) }
                 }
                 val ms = (System.nanoTime() - start) / 1_000_000
                 Metrics.record("query.parse.llm", ms.toDouble())
@@ -38,10 +40,12 @@ class IntentParser(private val llm: GenieXQwen, private val rules: RuleFallbackP
 
     fun detectLanguage(query: String) = rules.detectLanguage(query)
 
+    fun followUpCue(query: String) = rules.followUpCue(query)
+
     private fun ruledIsConfident(ruled: QueryIntent, q: String): Boolean = when (ruled.kind) {
         IntentKind.CHAT -> q.split(Regex("\\s+")).size <= QUICK_CHAT_WORDS
         IntentKind.REMINDERS, IntentKind.PACK, IntentKind.PHOTOS -> true
-        IntentKind.FIND, IntentKind.QUESTION -> ruled.docTypes.isNotEmpty() || ruled.template != null
+        IntentKind.FIND, IntentKind.QUESTION -> ruled.docTypes.isNotEmpty() || ruled.template != null || ruled.listAll
     }
 
     private companion object {

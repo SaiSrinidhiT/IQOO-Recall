@@ -3,10 +3,22 @@ package com.hackathon.recall.search
 import com.hackathon.recall.data.DocumentEntity
 import com.hackathon.recall.data.DocumentRepository
 import com.hackathon.recall.data.effectiveType
+import com.hackathon.recall.data.toSummary
+import com.hackathon.recall.model.DocType
 import com.hackathon.recall.data.PhotoDao
 import com.hackathon.recall.model.PhotoCategory
 import java.time.ZoneId
 import java.time.LocalDate
+
+/** Why a document reply may have no cards, so the chat says the right thing instead of "scan it". */
+enum class FoundNote {
+    /** Nothing matched: the chat offers to scan the document. */
+    NONE,
+    /** The only matches were already shown or rejected: there is simply no other one saved. */
+    NO_OTHER,
+    /** The reply text says it all (an unclear message, advice with nothing saved). */
+    TEXT_ONLY,
+}
 
 sealed interface QueryResult {
     val intent: QueryIntent
@@ -15,9 +27,7 @@ sealed interface QueryResult {
         override val intent: QueryIntent,
         val answer: Answer,
         val hits: List<HybridSearch.Hit>,
-        /** True when every match was excluded (the previous reply's documents, or ones the user rejected):
-         * [hits] is empty because there is nothing else, not because nothing was ever found. */
-        val excludedPrevious: Boolean = false,
+        val note: FoundNote = FoundNote.NONE,
     ) : QueryResult
     data class Pack(override val intent: QueryIntent, val templateId: String) : QueryResult
     data class Reminders(override val intent: QueryIntent, val docs: List<DocumentEntity>) : QueryResult
@@ -26,10 +36,6 @@ sealed interface QueryResult {
     /** Gallery photos (content URIs, newest first); for Trips & places, trip photos come first. */
     data class Photos(override val intent: QueryIntent, val category: PhotoCategory, val uris: List<String>, val place: String? = null) : QueryResult
 }
-
-/** The previous reply's document type(s) and the documents it showed, so a follow-up can tell "give me
- * a different one" from "show me this again" instead of re-running the identical deterministic search. */
-data class PreviousFind(val docTypes: List<com.hackathon.recall.model.DocType>, val shownIds: Set<Long>)
 
 /** The ask bar's pipeline: parse → route by intent → retrieve → answer (brief §6). */
 class QueryEngine(
@@ -46,9 +52,8 @@ class QueryEngine(
         today: LocalDate = LocalDate.now(),
         useLlm: Boolean = true,
         ownerFilter: String? = null,
-        /** The immediately preceding reply's documents, when it was a Found: lets "this is not the X" or
-         * a bare "wrong one" mean "something else", not an identical repeat of the same search. */
-        previousFind: PreviousFind? = null,
+        /** The previous reply, when it showed documents: what "it", "that one" and "another" refer to. */
+        context: ChatContext? = null,
         onToken: ((String) -> Unit)? = null,
     ): QueryResult {
         // A town the user has photos from ("ongole pics", "selfies in goa"): answered from the gallery by
@@ -63,13 +68,23 @@ class QueryEngine(
                 return QueryResult.Photos(ruled.copy(kind = IntentKind.PHOTOS), category ?: PhotoCategory.PLACES, uris, place)
             }
         }
-        // A short rejection of the previous reply ("that's not it", "wrong one") names no document itself;
-        // routing it as chat or a blind text search on its own words was the bug. Answer from the same
-        // category as before instead, minus what was already shown.
-        if (previousFind != null && previousFind.docTypes.isNotEmpty() && parser.isCorrection(query)) {
-            return findAgain(previousFind.docTypes, previousFind.shownIds, query, detectLanguage(query), ownerFilter)
+        // "That's not it", "wrong one": the previous answer was wrong. Same category, minus what was shown.
+        if (context != null && context.docTypes.isNotEmpty() && parser.isCorrection(query)) {
+            val ruled = parser.parse(query, today, useLlm = false)
+            val types = ruled.docTypes.ifEmpty { context.docTypes }
+            return find(ruled.copy(kind = IntentKind.FIND, docTypes = types), query, ownerFilter, context.shownIds)
         }
-        val intent = parser.parse(query, today, useLlm)
+        // "When does it expire?", "share it", "the second one", "and my wife's?": about the previous reply.
+        val ruled = parser.parse(query, today, useLlm = false)
+        FollowUp.plan(parser.followUpCue(query), ruled, context)?.let { plan ->
+            return followUp(plan, query, ruled, context!!, ownerFilter, useLlm, today)
+        }
+        val intent = parser.parse(query, today, useLlm, context?.describe())
+        // Qwen saw the previous reply and says this message is about it, in words the rules didn't catch.
+        if (intent.followUp && intent.source == "llm" && context != null && context.shown.isNotEmpty()) {
+            val plan = if (intent.kind == IntentKind.QUESTION) FollowUpPlan.Ask(context.shown) else FollowUpPlan.Show(context.shown, intent.action)
+            return followUp(plan, query, intent, context, ownerFilter, useLlm, today)
+        }
         return when (intent.kind) {
             IntentKind.CHAT -> {
                 val reply = chat.reply(query, intent.language, repo.count(), useLlm, onToken)
@@ -87,48 +102,108 @@ class QueryEngine(
             IntentKind.REMINDERS -> {
                 val withExpiry = repo.all().filter { it.expiryOn != null }
                     .filter { intent.docTypes.isEmpty() || it.effectiveType() in intent.docTypes }
+                    .filter { it.effectiveType() !in intent.excludeTypes }
                     .filter { ownerFilter.isNullOrBlank() || it.ownerName?.contains(ownerFilter, ignoreCase = true) == true }
                     .sortedBy { it.expiryOn }
                 QueryResult.Reminders(intent, withExpiry)
             }
-            IntentKind.FIND -> {
-                // Asking for the same type again right after seeing it is "give me a different one", not a
-                // request for the identical, deterministic result: exclude what was already shown.
-                val exclude = excludeFor(intent.docTypes, previousFind)
-                val hits = search.search(intent, query, limit = FIND_LIMIT, ownerFilter = ownerFilter, excludeIds = exclude)
-                // "Show me X": the cards are the answer. A Qwen-written sentence would add ~3-4 s and say
-                // nothing the cards don't, so the reply line is a template.
-                val answer = if (hits.isEmpty() && exclude.isNotEmpty()) answers.excludedAll(intent.language, intent.docTypes)
-                    else answers.answer(query, intent.language, hits.map { it.doc }, useLlm = false)
-                QueryResult.Found(intent, answer, hits, excludedPrevious = hits.isEmpty() && exclude.isNotEmpty())
-            }
+            // Asking for the same type again right after seeing it is "give me a different one", not a
+            // request for the identical, deterministic result: exclude what was already shown.
+            IntentKind.FIND -> find(intent, query, ownerFilter, excludeFor(intent.docTypes, context))
             IntentKind.QUESTION -> {
-                val exclude = excludeFor(intent.docTypes, previousFind)
+                val exclude = excludeFor(intent.docTypes, context)
                 val hits = search.search(intent, query, limit = QUESTION_LIMIT, ownerFilter = ownerFilter, excludeIds = exclude)
-                val answer = if (hits.isEmpty() && exclude.isNotEmpty()) answers.excludedAll(intent.language, intent.docTypes)
-                    else answers.answer(intent.question ?: query, intent.language, hits.map { it.doc }, useLlm)
+                if (hits.isEmpty() && exclude.isNotEmpty()) return QueryResult.Found(intent, answers.excludedAll(intent.language, intent.docTypes), hits, FoundNote.NO_OTHER)
+                if (hits.isEmpty() && intent.docTypes.isEmpty()) return QueryResult.Found(intent, answers.unclear(intent.language), hits, FoundNote.TEXT_ONLY)
+                val answer = answers.answer(intent.question ?: query, intent.language, hits.map { it.doc }, useLlm, today)
                 // Show the documents the answer came from, not every candidate it was chosen among.
                 // Qwen citing nothing means "not in your documents", so no cards; without Qwen, the candidates.
                 val shown = if (answer.source == "llm") hits.filter { it.doc.id in answer.citedDocIds } else hits
-                QueryResult.Found(intent, answer, shown, excludedPrevious = hits.isEmpty() && exclude.isNotEmpty())
+                QueryResult.Found(intent, answer, shown)
             }
         }
     }
 
+    /**
+     * "Show me X", with the reply line a person would give: how many are saved and whose, oldest first
+     * when asked, and guidance when the user asked to share, delete, edit or get advice.
+     */
+    private suspend fun find(intent: QueryIntent, query: String, ownerFilter: String?, exclude: Set<Long>): QueryResult.Found {
+        if (intent.listAll) return overview(intent, ownerFilter)
+        val lang = intent.language
+        val wide = intent.order == SortOrder.OLDEST
+        var hits = search.search(intent, query, limit = if (wide) WIDE_LIMIT else FIND_LIMIT, ownerFilter = ownerFilter, excludeIds = exclude)
+        if (wide) hits = hits.sortedBy { it.doc.toSummary().effectiveDate }.take(FIND_LIMIT)
+        return when {
+            hits.isEmpty() && exclude.isNotEmpty() -> QueryResult.Found(intent, answers.excludedAll(lang, intent.docTypes), hits, FoundNote.NO_OTHER)
+            hits.isEmpty() && intent.action == DocAction.ADVICE -> QueryResult.Found(intent, answers.adviceWithoutDocument(lang, intent.docTypes), hits, FoundNote.TEXT_ONLY)
+            hits.isEmpty() && intent.docTypes.isEmpty() && intent.template == null -> QueryResult.Found(intent, answers.unclear(lang), hits, FoundNote.TEXT_ONLY)
+            hits.isEmpty() -> QueryResult.Found(intent, answers.answer(query, lang, emptyList(), useLlm = false), hits)
+            else -> {
+                val all = matching(intent, ownerFilter)
+                val owners = all.mapNotNull { it.ownerName?.trim()?.takeIf(String::isNotEmpty) }.distinct().take(MAX_OWNERS)
+                val answer = answers.summary(lang, intent.docTypes, hits.map { it.doc }, all.size.coerceAtLeast(hits.size), owners, intent.order, intent.action)
+                QueryResult.Found(intent, answer, hits)
+            }
+        }
+    }
+
+    /** "What documents do I have?", "everything except Aadhaar": the latest few and a count per type. */
+    private suspend fun overview(intent: QueryIntent, ownerFilter: String?): QueryResult.Found {
+        val docs = repo.all()
+            .filter { it.effectiveType() !in intent.excludeTypes }
+            .filter { ownerFilter.isNullOrBlank() || it.ownerName?.contains(ownerFilter, ignoreCase = true) == true }
+            .sortedByDescending { it.toSummary().effectiveDate }
+        if (docs.isEmpty()) return QueryResult.Found(intent, answers.answer(intent.queryEn, intent.language, emptyList(), useLlm = false), emptyList())
+        val counts = docs.groupingBy { it.effectiveType() }.eachCount().entries.sortedByDescending { it.value }.take(MAX_OVERVIEW_TYPES).map { it.key to it.value }
+        return QueryResult.Found(intent, answers.overview(intent.language, docs.size, counts, intent.excludeTypes), docs.take(FIND_LIMIT).map(::hit))
+    }
+
+    /** Every saved document the intent's type, person and period cover: what a count or owner list is about. */
+    private suspend fun matching(intent: QueryIntent, ownerFilter: String?): List<DocumentEntity> {
+        if (intent.docTypes.isEmpty()) return emptyList()
+        return repo.all().filter { d ->
+            d.effectiveType() in intent.docTypes &&
+                (ownerFilter.isNullOrBlank() || d.ownerName?.contains(ownerFilter, ignoreCase = true) == true) &&
+                d.toSummary().effectiveDate.let { e -> (intent.dateFrom == null || !e.isBefore(intent.dateFrom)) && (intent.dateTo == null || !e.isAfter(intent.dateTo)) }
+        }
+    }
+
+    private suspend fun followUp(
+        plan: FollowUpPlan,
+        query: String,
+        ruled: QueryIntent,
+        context: ChatContext,
+        ownerFilter: String?,
+        useLlm: Boolean,
+        today: LocalDate,
+    ): QueryResult {
+        val lang = ruled.language
+        val types = context.docTypes
+        return when (plan) {
+            is FollowUpPlan.Ask -> {
+                val intent = ruled.copy(kind = IntentKind.QUESTION, docTypes = types, question = query, followUp = true)
+                val answer = answers.answer(query, lang, plan.docs, useLlm, today)
+                // They asked about these documents, so keep them on screen even when the answer isn't in them.
+                val cited = plan.docs.filter { it.id in answer.citedDocIds }
+                QueryResult.Found(intent, answer, cited.ifEmpty { plan.docs }.map(::hit))
+            }
+            is FollowUpPlan.Show -> {
+                val intent = ruled.copy(kind = IntentKind.FIND, docTypes = types, action = plan.action, followUp = true)
+                val answer = answers.summary(lang, plan.docs.map { it.effectiveType() }.distinct(), plan.docs, plan.docs.size, emptyList(), SortOrder.LATEST, plan.action)
+                QueryResult.Found(intent, answer, plan.docs.map(::hit))
+            }
+            is FollowUpPlan.Again -> find(ruled.copy(kind = IntentKind.FIND, docTypes = plan.types, followUp = true), query, ownerFilter, plan.excludeIds)
+        }
+    }
+
     /** Only exclude when the same category is being asked for again; a genuinely new type gets a clean search. */
-    private fun excludeFor(docTypes: List<com.hackathon.recall.model.DocType>, previousFind: PreviousFind?): Set<Long> {
-        if (previousFind == null || docTypes.isEmpty() || previousFind.docTypes.isEmpty()) return emptySet()
-        return if (docTypes.any { it in previousFind.docTypes }) previousFind.shownIds else emptySet()
+    private fun excludeFor(docTypes: List<DocType>, context: ChatContext?): Set<Long> {
+        if (context == null || docTypes.isEmpty() || context.docTypes.isEmpty()) return emptySet()
+        return if (docTypes.any { it in context.docTypes }) context.shownIds else emptySet()
     }
 
-    private fun detectLanguage(query: String) = parser.detectLanguage(query)
-
-    private suspend fun findAgain(types: List<com.hackathon.recall.model.DocType>, excludeIds: Set<Long>, query: String, lang: com.hackathon.recall.model.Lang, ownerFilter: String?): QueryResult.Found {
-        val intent = QueryIntent(IntentKind.FIND, null, types, query, null, null, lang, null, source = "rules")
-        val hits = search.search(intent, query, limit = FIND_LIMIT, ownerFilter = ownerFilter, excludeIds = excludeIds)
-        val answer = if (hits.isEmpty()) answers.excludedAll(lang, types) else answers.answer(query, lang, hits.map { it.doc }, useLlm = false)
-        return QueryResult.Found(intent, answer, hits, excludedPrevious = hits.isEmpty())
-    }
+    private fun hit(doc: DocumentEntity) = HybridSearch.Hit(doc, 0.0, null, false)
 
     /** The intent's period as epoch millis, whole days in the phone's time zone; open-ended when absent. */
     private fun millis(intent: QueryIntent): Pair<Long, Long> {
@@ -142,5 +217,9 @@ class QueryEngine(
         const val FIND_LIMIT = 6
         const val QUESTION_LIMIT = 3
         const val PHOTO_LIMIT = 60
+        /** Candidates fetched when sorting oldest first, so the oldest aren't cut off by relevance ranking. */
+        const val WIDE_LIMIT = 50
+        const val MAX_OWNERS = 4
+        const val MAX_OVERVIEW_TYPES = 5
     }
 }

@@ -38,6 +38,7 @@ class ChatResponder(private val context: Context, private val llm: GenieXQwen, p
             "thanks" -> R.string.chat_reply_thanks
             "help" -> R.string.chat_reply_help
             "bye" -> R.string.chat_reply_bye
+            "privacy" -> R.string.chat_reply_privacy
             else -> R.string.chat_reply_offtopic
         }
         return Reply(strings.getString(res), "template")
