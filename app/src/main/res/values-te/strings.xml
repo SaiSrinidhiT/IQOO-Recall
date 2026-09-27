@@ -7,6 +7,8 @@
     <string name="offline_violation">హెచ్చరిక: ఈ బిల్డ్ ఇంటర్నెట్ అనుమతి అడుగుతోంది</string>
 
     <string name="back">వెనక్కి</string>
+    <string name="history">చరిత్ర</string>
+    <string name="import_pdf">పీడీఎఫ్ దిగుమతి చేయండి</string>
     <string name="cancel">రద్దు చేయి</string>
     <string name="ok">సరే</string>
     <string name="save">సేవ్ చేయి</string>

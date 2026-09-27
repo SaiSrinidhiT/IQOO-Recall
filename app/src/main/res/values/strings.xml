@@ -9,6 +9,8 @@
 
     <!-- Common -->
     <string name="back">Back</string>
+    <string name="history">History</string>
+    <string name="import_pdf">Import a PDF</string>
     <string name="cancel">Cancel</string>
     <string name="ok">OK</string>
     <string name="save">Save</string>
