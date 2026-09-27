@@ -133,3 +133,28 @@ data class IndexStateRow(
 /** Small key/value store: watermarks, the chosen FTS module, calibration values. */
 @Entity(tableName = "kv")
 data class KvRow(@PrimaryKey val key: String, val value: String)
+
+/**
+ * One gallery photo, document or not: its category, when and where it was taken, which trip it belongs
+ * to, and its SigLIP2 image vector (kept for photo search). Documents also link to their [docId].
+ */
+@Entity(tableName = "photos", indices = [Index("category"), Index("trip_id"), Index("taken_at"), Index("place")])
+data class PhotoRow(
+    @PrimaryKey val uri: String,
+    val category: String,
+    val confidence: Float,
+    @ColumnInfo(name = "taken_at") val takenAt: Long,
+    @ColumnInfo(name = "relative_path") val relativePath: String?,
+    val lat: Double?,
+    val lon: Double?,
+    /** Faces found, or -1 when face detection didn't run on this photo. */
+    val faces: Int,
+    @ColumnInfo(name = "doc_id") val docId: Long?,
+    @ColumnInfo(name = "trip_id") val tripId: Long?,
+    val vector: ByteArray?,
+    /** Nearest town to the photo's GPS (offline GeoNames list), null without a location. */
+    val place: String? = null,
+) {
+    override fun equals(other: Any?) = other is PhotoRow && other.uri == uri && other.category == category && other.tripId == tripId && other.place == place
+    override fun hashCode() = uri.hashCode()
+}

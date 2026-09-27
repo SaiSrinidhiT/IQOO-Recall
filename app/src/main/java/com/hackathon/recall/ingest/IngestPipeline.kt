@@ -60,9 +60,10 @@ class IngestPipeline(
     )
 
     sealed interface Outcome {
-        data class Saved(val docId: Long, val type: DocType, val duplicateOf: DocumentEntity?) : Outcome
+        /** [imageVector] is the SigLIP2 vector the gate computed (null for PDFs or without SigLIP2), reused to file the photo. */
+        data class Saved(val docId: Long, val type: DocType, val duplicateOf: DocumentEntity?, val imageVector: FloatArray? = null) : Outcome
         data class ExactDuplicate(val existing: DocumentEntity) : Outcome
-        data class NotADocument(val label: String, val margin: Float) : Outcome
+        data class NotADocument(val label: String, val margin: Float, val imageVector: FloatArray? = null) : Outcome
         data class Failed(val reason: String) : Outcome
     }
 
@@ -94,7 +95,7 @@ class IngestPipeline(
             val verdict = gate?.second
             if (gated && verdict != null && !verdict.isDocument) {
                 val lenient = isScreenshotOrDocsFolder(src.relativePath) && verdict.uncertain
-                if (!lenient) return Outcome.NotADocument(verdict.topLabel, verdict.margin)
+                if (!lenient) return Outcome.NotADocument(verdict.topLabel, verdict.margin, imageVector)
             }
 
             val pages: List<Bitmap> = if (isPdf) ImageLoader.renderPdf(src.bytes) else listOf(ImageLoader.decode(src.bytes))
@@ -105,7 +106,7 @@ class IngestPipeline(
             val text = ocrPages.joinToString("\n") { it.text }
             // Without SigLIP2, gate on text density instead (docs/ARCHITECTURE.md §6).
             if (gated && verdict == null && ScriptDetector.usefulChars(text) < OcrEngine.MIN_USEFUL_CHARS) {
-                return Outcome.NotADocument("ocr-fallback: little text", 0f)
+                return Outcome.NotADocument("ocr-fallback: little text", 0f, imageVector)
             }
 
             val normalized = DigitNormalizer.normalize(text)
@@ -169,7 +170,7 @@ class IngestPipeline(
             val id = repo.save(NewDocument(doc, entityRows, pageRows, chunks, imageVector, src.bytes))
             expiry?.let { reminders.scheduleFor(id, it) }
             Metrics.record("ingest.document", (System.nanoTime() - start) / 1e6)
-            return Outcome.Saved(id, cls.type, duplicateOf)
+            return Outcome.Saved(id, cls.type, duplicateOf, imageVector)
             } finally {
                 pages.forEach { it.recycle() }
             }

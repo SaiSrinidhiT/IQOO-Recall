@@ -11,10 +11,11 @@ class IntentParser(private val llm: GenieXQwen, private val rules: RuleFallbackP
     suspend fun parse(query: String, today: LocalDate = LocalDate.now(), useLlm: Boolean = true): QueryIntent {
         val q = query.trim().take(MAX_QUERY_CHARS)
         val detected = rules.detectLanguage(q)
-        // Plain small talk ("hi", "thanks", "what can you do") needs no routing call: going straight to
-        // the chat reply saves a whole Qwen generation. Longer messages still get the model's judgement.
+        // Rules first: when the lexicon already recognises what is asked for (a document type, a task,
+        // "expiring", or plain small talk) the routing JSON Qwen would write is the same, and writing it
+        // costs ~2.5 s at ~24 tokens/s. Qwen is kept for messages the rules can't place.
         val ruled = Metrics.time("query.parse.rules") { rules.parse(q, today) }
-        if (ruled.kind == IntentKind.CHAT && q.split(Regex("\\s+")).size <= QUICK_CHAT_WORDS) return ruled
+        if (ruledIsConfident(ruled, q)) return ruled
         if (useLlm && llm.ensureLoaded()) {
             val start = System.nanoTime()
             try {
@@ -30,6 +31,17 @@ class IntentParser(private val llm: GenieXQwen, private val rules: RuleFallbackP
             }
         }
         return ruled
+    }
+
+    /** True for a short reply that rejects the previous answer ("that's not it", "wrong one"). */
+    fun isCorrection(query: String): Boolean = rules.isCorrection(query)
+
+    fun detectLanguage(query: String) = rules.detectLanguage(query)
+
+    private fun ruledIsConfident(ruled: QueryIntent, q: String): Boolean = when (ruled.kind) {
+        IntentKind.CHAT -> q.split(Regex("\\s+")).size <= QUICK_CHAT_WORDS
+        IntentKind.REMINDERS, IntentKind.PACK, IntentKind.PHOTOS -> true
+        IntentKind.FIND, IntentKind.QUESTION -> ruled.docTypes.isNotEmpty() || ruled.template != null
     }
 
     private companion object {

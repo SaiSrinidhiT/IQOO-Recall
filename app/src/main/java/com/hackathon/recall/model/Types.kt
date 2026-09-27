@@ -41,6 +41,16 @@ enum class DocType(val labelEn: String, val hasExpiry: Boolean = false) {
     }
 }
 
+/** Where a gallery photo is filed. Every photo gets exactly one; trips are a separate grouping by GPS and date. */
+enum class PhotoCategory(val db: String) {
+    SCREENSHOT("screenshot"), SELFIE("selfie"), PEOPLE("people"), FOOD("food"), PLACES("places"),
+    BILLS("bills"), DOCUMENTS("documents"), OTHER("other");
+
+    companion object {
+        fun fromDb(v: String?): PhotoCategory? = entries.firstOrNull { it.db == v || it.name == v }
+    }
+}
+
 enum class SourceKind(val db: String) {
     GALLERY("gallery"), CAMERA("camera"), PDF("pdf");
 

@@ -18,6 +18,7 @@ sqlcipher = "4.19.0"
 tink = "1.23.0"
 mlkitText = "16.0.1"
 mlkitBarcode = "17.3.0"
+mlkitFace = "16.1.7"
 # LiteRT 2.x dropped delegate support from the classic Interpreter; 1.4.2 is the last line that takes the QNN delegate.
 litert = "1.4.2"
 # Matches the QAIRT 2.45.0 runtime that GenieX 0.3.1 bundles (one QNN runtime in the APK).
@@ -59,6 +60,8 @@ tink-android = { module = "com.google.crypto.tink:tink-android", version.ref = "
 mlkit-text-latin = { module = "com.google.mlkit:text-recognition", version.ref = "mlkitText" }
 mlkit-text-devanagari = { module = "com.google.mlkit:text-recognition-devanagari", version.ref = "mlkitText" }
 mlkit-barcode = { module = "com.google.mlkit:barcode-scanning", version.ref = "mlkitBarcode" }
+# Bundled face model (no download at runtime): used only to confirm Selfie / People photos.
+mlkit-face = { module = "com.google.mlkit:face-detection", version.ref = "mlkitFace" }
 litert = { module = "com.google.ai.edge.litert:litert", version.ref = "litert" }
 litert-gpu = { module = "com.google.ai.edge.litert:litert-gpu", version.ref = "litert" }
 litert-gpu-api = { module = "com.google.ai.edge.litert:litert-gpu-api", version.ref = "litert" }

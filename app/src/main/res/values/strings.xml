@@ -34,7 +34,6 @@
     <string name="index_done_title">Scan complete</string>
     <string name="index_scanned">%1$d of %2$d photos scanned</string>
     <string name="index_documents_found">Documents found</string>
-    <string name="index_other_photos">Other photos</string>
     <string name="index_failed">Couldn\'t read</string>
     <string name="index_not_scanned">Not scanned yet</string>
     <string name="category_identity">Identity</string>
@@ -110,6 +109,8 @@
     <string name="results_mode_llm">Answer written by Qwen from your documents</string>
     <string name="results_mode_rules">Assistant in rules mode (language model not loaded)</string>
     <string name="answer_nothing_found">I couldn\'t find a matching document.</string>
+    <string name="answer_no_other_typed">That\'s the only %1$s I have saved.</string>
+    <string name="answer_no_other">That\'s the only one I have saved.</string>
     <plurals name="answer_found_docs">
         <item quantity="one">Found %1$d document: %2$s</item>
         <item quantity="other">Found %1$d documents: %2$s</item>
@@ -231,8 +232,6 @@
     <string name="perm_partial">Some photos only</string>
     <string name="perm_denied">Not allowed</string>
     <string name="voice_langs">Offline voice languages</string>
-    <string name="skipped_images">Images skipped as non-documents</string>
-    <string name="action_mark_document">Mark as document</string>
     <string name="allow_screen_capture">Allow screenshots and screen mirroring (for demos)</string>
     <string name="app_language">App language</string>
 
@@ -290,4 +289,35 @@
     <string name="chat_reply_help">I find your saved documents, answer questions from them, share them as PDF with Aadhaar masked, and tell you what is expiring. Try \"What expires this month?\"</string>
     <string name="chat_reply_bye">Bye! Your documents stay safe on this phone.</string>
     <string name="chat_reply_offtopic">I can only help with the documents saved on this phone. Try \"Show my Aadhaar\" or \"What expires this month?\"</string>
+    <string name="photo_cat_screenshot">Screenshots</string>
+    <string name="photo_cat_selfie">Selfies</string>
+    <string name="photo_cat_people">People</string>
+    <string name="photo_cat_food">Food</string>
+    <string name="photo_cat_places">Trips &amp; places</string>
+    <string name="photo_cat_bills">Bills &amp; receipts</string>
+    <string name="photo_cat_documents">Documents</string>
+    <string name="photo_cat_other">Other photos</string>
+    <string name="your_gallery">Your gallery</string>
+    <string name="docs_count">%1$d documents</string>
+    <string name="photos_empty">No photos here yet. They appear as the scan goes through your gallery.</string>
+    <string name="places_not_trip">Places near home</string>
+    <string name="photo_open_failed">No app to open this photo</string>
+    <string name="see_all_photos">See all</string>
+    <plurals name="photos_count">
+        <item quantity="one">%1$d photo</item>
+        <item quantity="other">%1$d photos</item>
+    </plurals>
+    <plurals name="trips_count">
+        <item quantity="one">%1$d trip</item>
+        <item quantity="other">%1$d trips</item>
+    </plurals>
+    <plurals name="chat_photos_found">
+        <item quantity="one">%1$s: %2$d photo.</item>
+        <item quantity="other">%1$s: %2$d photos.</item>
+    </plurals>
+    <plurals name="trip_photos">
+        <item quantity="one">%1$d photo</item>
+        <item quantity="other">%1$d photos</item>
+    </plurals>
+    <string name="chat_photos_none">%1$s: no photos found. Only photos the scan has filed can be searched, and places need the photo\'s location.</string>
 </resources>

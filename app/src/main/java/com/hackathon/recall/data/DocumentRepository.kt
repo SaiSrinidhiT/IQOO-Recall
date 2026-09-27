@@ -159,13 +159,14 @@ fun DocumentEntity.isTypeConfident(): Boolean = isUserConfirmed || docTypeConfid
 fun DocumentEntity.effectiveType(): DocType = if (isTypeConfident()) type() else DocType.OTHER_DOCUMENT
 
 /**
- * The title to show. Stored titles lead with the detected type ("Loan sanction letter or EMI schedule ·
- * 12 Mar 2026"), which would tag an unsure document with its guess; for those the label is dropped.
+ * The title to show. Stored titles lead with the type detected at scan time ("Loan sanction letter or EMI
+ * schedule · 12 Mar 2026"). That label is dropped whenever it isn't the type the document now counts as:
+ * an unsure guess (which would otherwise tag it), or a type Qwen or the user has since changed.
  */
 fun DocumentEntity.displayTitle(): String {
-    if (isTypeConfident()) return titleEn
-    val label = type().labelEn
-    return if (titleEn.startsWith(label)) titleEn.removePrefix(label).trim().removePrefix("·").trim() else titleEn
+    val lead = DocType.entries.filter { titleEn.startsWith(it.labelEn) }.maxByOrNull { it.labelEn.length } ?: return titleEn
+    if (lead == effectiveType()) return titleEn
+    return titleEn.removePrefix(lead.labelEn).trim().removePrefix("·").trim()
 }
 
 fun DocumentEntity.toSummary(): DocSummary = DocSummary(

@@ -24,6 +24,7 @@ object Prompts {
               "question": the user wants a fact written inside a document. ("what is my policy number", "when does my licence expire", "how much was my last salary")
               "reminders": the user asks what is expiring, due or needs renewal, without naming one document.
               "pack": the user wants papers gathered for a task: home_loan, health_insurance_claim, vehicle_insurance_renewal or passport.
+              "photos": the user wants gallery photos rather than a document: selfies, screenshots, photos of people, friends or family, food, trips, travel or places. ("show my selfies", "pics from my Goa trip", "food photos from last month")
               "chat": everything else. Greetings ("hi", "hello", "namaste"), thanks, "ok", "bye", "how are you", "who are you", "what can you do", help, jokes, feelings, complaints, general knowledge, news, weather, maths, coding, advice, a lone emoji, gibberish or an empty message.
             - task_template: one of the four task names for "pack", otherwise null.
             - doc_types: zero or more of $DOC_TYPES. Only types the message clearly means. Always [] for "chat".
@@ -31,6 +32,7 @@ object Prompts {
             - date_from, date_to: YYYY-MM-DD, only when the message names a period ("last month", "in 2024", "pichle mahine", "గత నెల"); resolve it from today's date. "latest", "recent", "new", "current" and "my" are NOT periods: use null.
             - answer_language: the language the user wrote in. "te" for Telugu script or romanized Telugu, "hi" for Hindi script or romanized Hindi, otherwise "en". An English sentence is "en" even if it names an Indian document.
             - question: the user's question in English for "question", otherwise null.
+            - photo_category: for "photos" only, exactly one of "screenshot", "selfie", "people", "food", "places" (trips and travel are "places"); otherwise null.
 
             Rules:
             - A message that names or implies a document or a detail stored in one is never "chat", even if it starts with a greeting: "hi, show my aadhaar" is "find".
@@ -56,6 +58,8 @@ object Prompts {
             {"intent":"pack","task_template":"home_loan","doc_types":[],"query_en":"home loan documents","date_from":null,"date_to":null,"answer_language":"te","question":null}
             User: what is my car insurance policy number
             {"intent":"question","task_template":null,"doc_types":["VEHICLE_INSURANCE"],"query_en":"car insurance policy number","date_from":null,"date_to":null,"answer_language":"en","question":"What is my car insurance policy number?"}
+            User: show my trip photos
+            {"intent":"photos","task_template":null,"doc_types":[],"query_en":"trip photos","date_from":null,"date_to":null,"answer_language":"en","question":null,"photo_category":"places"}
             User: anything expiring soon?
             {"intent":"reminders","task_template":null,"doc_types":[],"query_en":"expiring documents","date_from":null,"date_to":null,"answer_language":"en","question":null}
         """.trimIndent()
@@ -63,7 +67,7 @@ object Prompts {
 
     fun answerSystem(lang: Lang): String = """
         You answer questions about the user's own documents using ONLY the document texts given. Reply with one JSON object: {"answer": "...", "cited_doc_ids": [numbers]}.
-        Write "answer" in ${lang.englishName}, in one or two plain sentences. Do not write document ids, brackets or OCR noise in "answer"; list the ids you used only in "cited_doc_ids".
+        Write "answer" in ${lang.englishName}, as ONE short sentence that states the fact asked for (for example "Your policy number is 12345, valid till 3 March 2027."). Do not write document ids, brackets or OCR noise in "answer"; list the ids you used only in "cited_doc_ids".
         If the documents do not contain the answer, say so in ${lang.englishName} and cite nothing. Never invent numbers, dates or names.
     """.trimIndent()
 
@@ -82,9 +86,23 @@ object Prompts {
     """.trimIndent()
 
     val docTypeSystem = """
-        Classify this document from its OCR text. Reply with one JSON object: {"doc_type": "<TYPE>"}, where TYPE is one of: $DOC_TYPES.
-        Use OTHER_DOCUMENT when none fits.
+        Classify one document from its OCR text. Reply with one JSON object: {"doc_type": "<TYPE>"} and nothing else.
+        TYPE is one of: ${DocType.entries.joinToString("; ") { "${it.name} (${it.labelEn})" }}.
+        Rules:
+        - Pick a type only when the text clearly shows that kind of document: its title, issuing authority, or the fields it always has.
+        - Screenshots of apps, chats, shopping or food orders, advertisements, posters, notes and anything not in the list: OTHER_DOCUMENT.
+        - When unsure between two types, or unsure at all: OTHER_DOCUMENT.
+        Types that are often confused:
+        - LOAN_SANCTION_EMI: a bank or NBFC sanction or approval letter, loan agreement, or EMI or repayment schedule for a loan account. NOT a loan app screenshot, an "instant loan approved" message or advert, or a receipt for one EMI payment.
+        - PAYMENT_SCREENSHOT: a UPI or wallet payment confirmation (paid to, UTR, transaction ID).
+        - RECEIPT_INVOICE: a bill or tax invoice from a shop, restaurant or seller.
+        - BANK_STATEMENT: a bank's list of account transactions with balances.
+        - SALARY_SLIP: an employer's payslip with earnings and deductions.
+        - TICKET: a travel or event ticket with a PNR or booking reference.
     """.trimIndent()
+
+    /** Bump when [docTypeSystem] changes, so documents Qwen verified with the old wording are re-checked. */
+    const val DOC_TYPE_PROMPT_VERSION = 2
 
     val expirySystem = """
         Pick which candidate date is the document's expiry, valid-till, due or renewal date. Reply with one JSON object: {"index": <number>},

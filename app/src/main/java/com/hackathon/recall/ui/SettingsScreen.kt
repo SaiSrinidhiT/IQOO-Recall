@@ -26,12 +26,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,13 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.hackathon.recall.R
-import com.hackathon.recall.data.IndexStateRow
-import com.hackathon.recall.ingest.IngestPipeline
 import com.hackathon.recall.model.Lang
-import com.hackathon.recall.model.SourceKind
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /** Stores the demo-only "allow screen capture" switch; FLAG_SECURE is on unless the user turns it off. */
 object ScreenCapture {
@@ -61,12 +53,8 @@ object ScreenCapture {
 fun SettingsScreen(nav: NavHostController) {
     val container = LocalContainer.current
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     var capture by remember { mutableStateOf(ScreenCapture.allowed(context)) }
     val voiceLangs by produceState<List<String>?>(null) { value = container.voice.installedOfflineLanguages() }
-    var skipped by remember { mutableStateOf<List<IndexStateRow>>(emptyList()) }
-    val refreshSkipped: suspend () -> Unit = { skipped = withContext(Dispatchers.IO) { container.database.indexState().skipped(50) } }
-    LaunchedEffect(Unit) { refreshSkipped() }
 
     Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.settings_title)) }, navigationIcon = { TextButton(onClick = { nav.popBackStack() }) { Text(stringResource(R.string.back)) } }) }) { padding ->
         Column(Modifier.padding(padding).padding(16.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -102,27 +90,6 @@ fun SettingsScreen(nav: NavHostController) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
                 Text(stringResource(R.string.allow_screen_capture), modifier = Modifier.weight(1f))
                 Switch(checked = capture, onCheckedChange = { capture = it; ScreenCapture.set(context, it) })
-            }
-
-            SectionTitle(stringResource(R.string.skipped_images))
-            skipped.forEach { row ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("${row.relativePath.orEmpty()} · ${row.gateLabel.orEmpty()}", modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodySmall)
-                    TextButton(onClick = {
-                        scope.launch {
-                            withContext(Dispatchers.IO) {
-                                val bytes = context.contentResolver.openInputStream(Uri.parse(row.uri))?.use { it.readBytes() } ?: return@withContext
-                                val outcome = container.pipeline.ingest(
-                                    IngestPipeline.Source(bytes, row.mimeType ?: "image/*", SourceKind.GALLERY, row.uri, row.takenAt, row.relativePath, forceDocument = true),
-                                )
-                                if (outcome is IngestPipeline.Outcome.Saved) {
-                                    container.database.indexState().update(row.copy(status = "done", docId = outcome.docId, updatedAt = System.currentTimeMillis()))
-                                }
-                            }
-                            refreshSkipped()
-                        }
-                    }) { Text(stringResource(R.string.action_mark_document)) }
-                }
             }
         }
     }

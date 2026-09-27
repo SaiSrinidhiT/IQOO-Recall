@@ -38,6 +38,7 @@ object Routes {
     fun doc(id: Long) = "doc/$id"
     fun scan(expected: String? = null) = "scan" + (expected?.let { "?expected=$it" } ?: "")
     fun vaultCategory(category: String) = "vault?category=$category"
+    fun photos(category: String) = "photos/$category"
 }
 
 /** Top level: wait for the encrypted vault to open, then the biometric gate, then first-run onboarding, then the app. */
@@ -57,6 +58,7 @@ fun RecallRoot(renewalDocId: StateFlow<Long?>, onRenewalHandled: () -> Unit) {
         !unlocked -> LockScreen(onUnlocked = container.session::unlock)
         !onboarded -> OnboardingScreen(onDone = { onboarded = true })
         else -> {
+            LaunchedEffect(Unit) { container.warmUpAssistant() }
             val nav = rememberNavController()
             RecallNav(nav)
             val pending by renewalDocId.collectAsState()
@@ -98,6 +100,9 @@ fun RecallNav(nav: NavHostController) {
             "scan?expected={expected}",
             arguments = listOf(navArgument("expected") { type = NavType.StringType; nullable = true; defaultValue = null }),
         ) { CameraScanScreen(nav, it.arguments?.getString("expected")) }
+        composable("photos/{category}", arguments = listOf(navArgument("category") { type = NavType.StringType })) {
+            PhotosScreen(nav, it.arguments?.getString("category").orEmpty())
+        }
         composable(Routes.BENCHMARK) { BenchmarkScreen(nav) }
         composable(Routes.SETTINGS) { SettingsScreen(nav) }
         composable(Routes.MODELS) { ModelsScreen(nav) }

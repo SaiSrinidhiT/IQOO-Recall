@@ -38,6 +38,9 @@ class EffectiveTypeTest {
         val sure = unsure.copy(docTypeConfidence = 0.9f)
         assertEquals("Loan sanction letter or EMI schedule · 12 Mar 2026 · Ravi Kumar", sure.displayTitle())
         assertEquals("", doc(2, DocType.LOAN_SANCTION_EMI, 0.4f).displayTitle())
+        // Retyped since the scan (by Qwen or the user): the old label goes, even though it is now confident.
+        val retyped = sure.copy(docType = DocType.BANK_STATEMENT.name)
+        assertEquals("12 Mar 2026 · Ravi Kumar", retyped.displayTitle())
     }
 
     /** The reported bug: a 55% "loan sanction" photo was listed under the Loan sanction / EMI header. */

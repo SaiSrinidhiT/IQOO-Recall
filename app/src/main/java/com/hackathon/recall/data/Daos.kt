@@ -1,5 +1,6 @@
 package com.hackathon.recall.data
 
+import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -156,6 +157,10 @@ interface IndexStateDao {
 
     @Query("SELECT status, COUNT(*) AS n FROM index_state GROUP BY status")
     suspend fun counts(): List<StatusCount>
+
+    /** Photos indexed before gallery categories existed: finished, but not yet filed in `photos`. */
+    @Query("SELECT * FROM index_state WHERE status IN ('done', 'skipped_non_doc') AND uri NOT IN (SELECT uri FROM photos) LIMIT :limit")
+    suspend fun unfiled(limit: Int): List<IndexStateRow>
 }
 
 @Dao
@@ -166,3 +171,74 @@ interface KvDao {
     @Upsert
     suspend fun put(row: KvRow)
 }
+
+data class CategoryCount(val category: String, val n: Int)
+
+@Dao
+interface PhotoDao {
+    @Upsert
+    suspend fun upsert(row: PhotoRow)
+
+    @Query("SELECT uri FROM photos")
+    suspend fun uris(): List<String>
+
+    @Query("SELECT category, COUNT(*) AS n FROM photos GROUP BY category")
+    fun observeCounts(): Flow<List<CategoryCount>>
+
+    @Query("SELECT COUNT(DISTINCT trip_id) FROM photos WHERE trip_id IS NOT NULL")
+    fun observeTripCount(): Flow<Int>
+
+    @Query("SELECT * FROM photos WHERE category = :category ORDER BY taken_at DESC")
+    fun observeCategory(category: String): Flow<List<PhotoRow>>
+
+    @Query("SELECT * FROM photos WHERE trip_id IS NOT NULL ORDER BY taken_at DESC")
+    fun observeTrips(): Flow<List<PhotoRow>>
+
+    @Query("SELECT * FROM photos WHERE category = :category AND taken_at BETWEEN :from AND :to ORDER BY taken_at DESC LIMIT :limit")
+    suspend fun byCategory(category: String, from: Long, to: Long, limit: Int): List<PhotoRow>
+
+    @Query("SELECT * FROM photos WHERE trip_id IS NOT NULL AND taken_at BETWEEN :from AND :to ORDER BY taken_at DESC LIMIT :limit")
+    suspend fun inTrips(from: Long, to: Long, limit: Int): List<PhotoRow>
+
+    @Query("SELECT uri, taken_at, lat, lon FROM photos WHERE lat IS NOT NULL AND lon IS NOT NULL")
+    suspend fun located(): List<LocatedPhoto>
+
+    @Query("UPDATE photos SET trip_id = NULL")
+    suspend fun clearTrips()
+
+    @Query("UPDATE photos SET trip_id = :tripId WHERE uri = :uri")
+    suspend fun setTrip(uri: String, tripId: Long)
+
+    @Query("SELECT * FROM photos WHERE doc_id = :docId LIMIT 1")
+    suspend fun byDoc(docId: Long): PhotoRow?
+
+    @Query("SELECT * FROM photos WHERE doc_id IS NOT NULL")
+    suspend fun withDocs(): List<PhotoRow>
+
+    @Query("UPDATE photos SET category = :category, confidence = :confidence, doc_id = :docId WHERE uri = :uri")
+    suspend fun setCategory(uri: String, category: String, confidence: Float, docId: Long?)
+
+    @Query("SELECT * FROM photos WHERE uri = :uri")
+    suspend fun byUri(uri: String): PhotoRow?
+
+    @Query("SELECT category, COUNT(*) AS n FROM photos GROUP BY category")
+    suspend fun counts(): List<CategoryCount>
+
+    @Query("SELECT DISTINCT place FROM photos WHERE place IS NOT NULL")
+    suspend fun places(): List<String>
+
+    @Query("SELECT uri, taken_at, lat, lon FROM photos WHERE lat IS NOT NULL AND lon IS NOT NULL AND place IS NULL")
+    suspend fun unplaced(): List<LocatedPhoto>
+
+    @Query("UPDATE photos SET place = :place WHERE uri = :uri")
+    suspend fun setPlace(uri: String, place: String)
+
+    /** Photos taken at [place]; [category] null means any category. */
+    @Query("SELECT * FROM photos WHERE place = :place COLLATE NOCASE AND (:category IS NULL OR category = :category) AND taken_at BETWEEN :from AND :to ORDER BY taken_at DESC LIMIT :limit")
+    suspend fun atPlace(place: String, category: String?, from: Long, to: Long, limit: Int): List<PhotoRow>
+
+    @Query("DELETE FROM photos WHERE uri = :uri")
+    suspend fun delete(uri: String)
+}
+
+data class LocatedPhoto(val uri: String, @ColumnInfo(name = "taken_at") val takenAt: Long, val lat: Double, val lon: Double)

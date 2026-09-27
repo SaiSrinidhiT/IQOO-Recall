@@ -69,6 +69,12 @@ class ModelManager(private val context: Context, val files: ModelFiles, private 
     @Volatile var gatekeeper: Gatekeeper? = null
         private set
 
+    /** Gallery photo categories (Selfies, Food, …); null until SigLIP2 is loaded. */
+    @Volatile var photoCategorizer: PhotoCategorizer? = null
+        private set
+
+    val faces: FaceCounter by lazy { FaceCounter() }
+
     /** Why the gatekeeper is off although SigLIP2 may be loaded (for example, labels not generated yet). */
     @Volatile var gatekeeperProblem: String? = null
         private set
@@ -102,6 +108,9 @@ class ModelManager(private val context: Context, val files: ModelFiles, private 
             _siglipState.value = ModelState.Ready(model.backend, model.loadMs, "input ${model.inputs[0].shape().contentToString()}")
             gatekeeper = loadLabels()?.let { Gatekeeper(it, config.gatekeeper.margin, config.gatekeeper.uncertainBand) }
             if (gatekeeper == null) gatekeeperProblem = "assets/siglip_labels.json missing (run tools/siglip_labels.py)"
+            photoCategorizer = runCatching {
+                context.assets.open("photo_labels.json").use { json.decodeFromString(PhotoLabels.serializer(), it.readBytes().decodeToString()) }
+            }.onFailure { Log.w(TAG, "photo_labels.json unreadable: ${it.javaClass.simpleName}") }.getOrNull()?.let(::PhotoCategorizer)
         } catch (t: Throwable) {
             Log.e(TAG, "SigLIP2 failed", t)
             _siglipState.value = ModelState.Failed(t.message ?: t.javaClass.simpleName)

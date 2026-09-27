@@ -3,6 +3,7 @@ package com.hackathon.recall.search
 import com.hackathon.recall.extract.DateParser
 import com.hackathon.recall.extract.DatePrecision
 import com.hackathon.recall.model.DocType
+import com.hackathon.recall.model.PhotoCategory
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -28,12 +29,15 @@ class RuleFallbackParser(private val lexicon: Lexicon) {
         val template = templateHits.firstOrNull()?.key
         fun has(intent: String) = match(q, mapOf(intent to lexicon.intentWords[intent].orEmpty())).isNotEmpty()
         val noDocument = docTypes.isEmpty() && template == null
+        // Photos only when no document is named: "restaurant bill screenshot" is still a document search.
+        val photoCategory = if (noDocument) photoCategoryOf(q) else null
         // Small talk only when nothing else in the message asks for a document; "hi, show my aadhaar" is a find.
-        val smallTalk = noDocument && !has("reminders") && !has("pack") && !has("question") &&
+        val smallTalk = noDocument && photoCategory == null && !has("reminders") && !has("pack") && !has("question") &&
             (chatKindOf(q) != null || q.none { it.isLetterOrDigit() })
 
         val kind = when {
             smallTalk -> IntentKind.CHAT
+            photoCategory != null -> IntentKind.PHOTOS
             has("reminders") && template == null -> IntentKind.REMINDERS
             template != null -> IntentKind.PACK
             has("pack") && docTypes.isNotEmpty() -> IntentKind.FIND
@@ -57,8 +61,15 @@ class RuleFallbackParser(private val lexicon: Lexicon) {
             language = lang,
             question = if (kind == IntentKind.QUESTION) query.trim() else null,
             source = "rules",
+            photoCategory = photoCategory,
         )
     }
+
+    private fun photoCategoryOf(normalized: String): PhotoCategory? =
+        longestHits(match(normalized, lexicon.photoCategories)).firstNotNullOfOrNull { PhotoCategory.fromDb(it.key) }
+
+    /** True for a short reply that rejects the previous answer ("that's not it", "wrong one"), not a fresh request. */
+    fun isCorrection(query: String): Boolean = match(QueryText.normalize(query), lexicon.correctionWords).isNotEmpty()
 
     fun detectLanguage(query: String) = languageDetector.detect(query)
 

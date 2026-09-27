@@ -2,7 +2,9 @@ package com.hackathon.recall.search
 
 import android.util.Log
 import com.hackathon.recall.actions.ReminderScheduler
+import com.hackathon.recall.data.DocumentEntity
 import com.hackathon.recall.data.DocumentRepository
+import com.hackathon.recall.data.isTypeConfident
 import com.hackathon.recall.data.type
 import com.hackathon.recall.extract.DateParser
 import com.hackathon.recall.extract.ExpiryDecision
@@ -13,20 +15,42 @@ import com.hackathon.recall.model.DocTypeSource
 import java.time.LocalDate
 
 /**
- * Finishes the LLM steps ingest deferred (brief §5 step 3, §4 expiry pick): doc type from the enum
- * given the first 600 OCR characters, and the expiry as a candidate index, never a free-form date.
- * Runs only while Qwen is loaded (foreground), so background indexing never loads a 4B model.
+ * Finishes the LLM steps ingest deferred (brief §5 step 3, §4 expiry pick) and double-checks every
+ * unsure document type: Qwen reads the OCR text and picks a type. Agreement with the rules/image
+ * guess confirms it ([AGREED], above the 80% bar, so it joins its category); disagreement keeps it
+ * unsure ([DISAGREED], filed under Other, with Qwen's pick offered on the document screen). Expiry is
+ * picked as a candidate index, never a free-form date. Started after unlock, while Qwen is loaded.
  */
 class LlmEnricher(private val repo: DocumentRepository, private val llm: GenieXQwen, private val reminders: ReminderScheduler) {
-    suspend fun runPending(today: LocalDate = LocalDate.now()): Int {
+    /**
+     * [recheckConfirmed]: also re-run documents an older classification prompt confirmed into a category
+     * (see [Prompts.DOC_TYPE_PROMPT_VERSION]). Ones Qwen disagreed with stay as they are: re-asking would
+     * compare Qwen with itself, not with an independent reading.
+     */
+    suspend fun runPending(today: LocalDate = LocalDate.now(), recheckConfirmed: Boolean = false): Int {
         if (!llm.ensureLoaded()) return 0
         var n = 0
-        for (doc in repo.all().filter { it.needsLlm != 0 && !it.isUserConfirmed }) {
+        fun confirmedByOldPrompt(d: DocumentEntity) = recheckConfirmed && d.docTypeSource == DocTypeSource.LLM.db &&
+            d.isTypeConfident() && d.type() != DocType.OTHER_DOCUMENT
+        val pending = repo.all().filter { d ->
+            !d.isUserConfirmed && (d.needsLlm != 0 || (d.docTypeSource != DocTypeSource.LLM.db && !d.isTypeConfident()) || confirmedByOldPrompt(d))
+        }
+        for (doc in pending) {
             try {
-                if (doc.needsLlm and DocumentRepository.NEEDS_DOC_TYPE != 0) {
-                    val type = llm.askJson(Prompts.docTypeSystem, "OCR text (first 600 characters):\n${doc.ocrText.take(600)}", 24,
+                val unsure = (doc.docTypeSource != DocTypeSource.LLM.db && !doc.isTypeConfident()) || confirmedByOldPrompt(doc)
+                if (doc.needsLlm and DocumentRepository.NEEDS_DOC_TYPE != 0 || unsure) {
+                    val verdict = llm.askJson(Prompts.docTypeSystem, "OCR text:\n${doc.ocrText.take(OCR_CHARS)}", 24,
                         { LlmJson.decode<DocTypeJson>(it) }) { j -> DocType.parse(j.docType) ?: throw IllegalArgumentException("doc_type must be one of the listed types") }
-                    repo.setDocType(doc.id, type, DocTypeSource.LLM, 0.7f)
+                    val guess = doc.type()
+                    val (type, confidence) = when {
+                        verdict == guess -> guess to AGREED
+                        // Not any listed document: nothing to file it under, and nothing to doubt.
+                        verdict == DocType.OTHER_DOCUMENT -> DocType.OTHER_DOCUMENT to AGREED
+                        else -> verdict to DISAGREED
+                    }
+                    repo.setDocType(doc.id, type, DocTypeSource.LLM, confidence)
+                    // Types and scores only: document text never goes to the log.
+                    Log.i(TAG, "doc ${doc.id}: rules ${guess.name} ${(doc.docTypeConfidence * 100).toInt()}%, qwen ${verdict.name} -> ${type.name} ${(confidence * 100).toInt()}%")
                 }
                 if (doc.needsLlm and DocumentRepository.NEEDS_EXPIRY != 0) {
                     val lines = doc.ocrText.lines()
@@ -54,5 +78,10 @@ class LlmEnricher(private val repo: DocumentRepository, private val llm: GenieXQ
 
     private companion object {
         const val TAG = "LlmEnricher"
+        const val OCR_CHARS = 900
+        /** Two independent readings (rules/image and Qwen) name the same type. */
+        const val AGREED = 0.9f
+        /** They disagree: below the 80% bar, so the document waits under Other for the user. */
+        const val DISAGREED = 0.6f
     }
 }

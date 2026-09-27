@@ -125,7 +125,6 @@ private fun ScanSummary(paused: Boolean, modifier: Modifier, onCategory: ((Strin
                     SummaryRow(stringResource(DocCategory.label(key)), count, indent = true, onClick = open)
                 }
             }
-            SummaryRow(stringResource(R.string.index_other_photos), otherPhotos)
             if (failed > 0) SummaryRow(stringResource(R.string.index_failed), failed)
             if (pending > 0) SummaryRow(stringResource(R.string.index_not_scanned), pending)
 

@@ -14,6 +14,10 @@ data class Lexicon(
     @SerialName("relative_dates") val relativeDates: Map<String, List<String>>,
     /** Small-talk vocabulary by kind (greeting, thanks, help, bye): routes a message to chat, not search. */
     @SerialName("chat_words") val chatWords: Map<String, List<String>> = emptyMap(),
+    /** Gallery category (PhotoCategory name) → words that ask for those photos. */
+    @SerialName("photo_categories") val photoCategories: Map<String, List<String>> = emptyMap(),
+    /** Phrases that reject the previous reply ("that's not it", "wrong one"), keyed just "correction". */
+    @SerialName("correction_words") val correctionWords: Map<String, List<String>> = emptyMap(),
 ) {
     companion object {
         fun parse(json: String): Lexicon = LlmJson.json.decodeFromString(serializer(), json)

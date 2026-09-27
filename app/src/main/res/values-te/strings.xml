@@ -52,6 +52,8 @@
     <string name="results_mode_llm">మీ పత్రాల ఆధారంగా Qwen రాసిన జవాబు</string>
     <string name="results_mode_rules">సహాయకుడు నియమాల మోడ్‌లో ఉన్నాడు (భాషా మోడల్ లోడ్ కాలేదు)</string>
     <string name="answer_nothing_found">సరిపోయే పత్రం ఏదీ దొరకలేదు.</string>
+    <string name="answer_no_other_typed">నా దగ్గర ఇదొక్కటే %1$s సేవ్ అయి ఉంది.</string>
+    <string name="answer_no_other">నా దగ్గర ఇదొక్కటే సేవ్ అయి ఉంది.</string>
     <plurals name="answer_found_docs">
         <item quantity="one">%1$d పత్రం దొరికింది: %2$s</item>
         <item quantity="other">%1$d పత్రాలు దొరికాయి: %2$s</item>
@@ -136,8 +138,6 @@
     <string name="perm_partial">కొన్ని ఫోటోలు మాత్రమే</string>
     <string name="perm_denied">అనుమతి లేదు</string>
     <string name="voice_langs">ఆఫ్‌లైన్ వాయిస్ భాషలు</string>
-    <string name="skipped_images">పత్రాలు కావని వదిలేసిన చిత్రాలు</string>
-    <string name="action_mark_document">పత్రంగా గుర్తించు</string>
     <string name="allow_screen_capture">స్క్రీన్‌షాట్లు, స్క్రీన్ మిర్రరింగ్ అనుమతించు (డెమో కోసం)</string>
     <string name="app_language">యాప్ భాష</string>
 
@@ -192,4 +192,35 @@
     <string name="chat_reply_help">మీరు సేవ్ చేసిన పత్రాలను వెతుకుతాను, వాటి నుండి ప్రశ్నలకు సమాధానం ఇస్తాను, ఆధార్ దాచి PDFగా షేర్ చేస్తాను, ఏవి గడువు ముగుస్తున్నాయో చెబుతాను.</string>
     <string name="chat_reply_bye">సెలవు! మీ పత్రాలు ఈ ఫోన్‌లోనే సురక్షితంగా ఉంటాయి.</string>
     <string name="chat_reply_offtopic">ఈ ఫోన్‌లో సేవ్ చేసిన మీ పత్రాల విషయంలో మాత్రమే సహాయం చేయగలను. \"నా ఆధార్ చూపించు\" అని అడిగి చూడండి.</string>
+    <string name="photo_cat_screenshot">స్క్రీన్‌షాట్‌లు</string>
+    <string name="photo_cat_selfie">సెల్ఫీలు</string>
+    <string name="photo_cat_people">వ్యక్తులు</string>
+    <string name="photo_cat_food">ఆహారం</string>
+    <string name="photo_cat_places">ప్రయాణాలు &amp; ప్రదేశాలు</string>
+    <string name="photo_cat_bills">బిల్లులు &amp; రసీదులు</string>
+    <string name="photo_cat_documents">పత్రాలు</string>
+    <string name="photo_cat_other">ఇతర ఫోటోలు</string>
+    <string name="your_gallery">మీ గ్యాలరీ</string>
+    <string name="docs_count">%1$d పత్రాలు</string>
+    <string name="photos_empty">ఇక్కడ ఇంకా ఫోటోలు లేవు. స్కాన్ జరుగుతున్న కొద్దీ ఇక్కడ కనిపిస్తాయి.</string>
+    <string name="places_not_trip">ఇంటి దగ్గరి ప్రదేశాలు</string>
+    <string name="photo_open_failed">ఈ ఫోటో తెరవడానికి యాప్ లేదు</string>
+    <string name="see_all_photos">అన్నీ చూడండి</string>
+    <plurals name="photos_count">
+        <item quantity="one">%1$d ఫోటో</item>
+        <item quantity="other">%1$d ఫోటోలు</item>
+    </plurals>
+    <plurals name="trips_count">
+        <item quantity="one">%1$d ప్రయాణం</item>
+        <item quantity="other">%1$d ప్రయాణాలు</item>
+    </plurals>
+    <plurals name="chat_photos_found">
+        <item quantity="one">%1$s: %2$d ఫోటో.</item>
+        <item quantity="other">%1$s: %2$d ఫోటోలు.</item>
+    </plurals>
+    <plurals name="trip_photos">
+        <item quantity="one">%1$d ఫోటో</item>
+        <item quantity="other">%1$d ఫోటోలు</item>
+    </plurals>
+    <string name="chat_photos_none">%1$s: ఫోటోలు దొరకలేదు. స్కాన్ అయిన ఫోటోలే వెతకగలం, ప్రదేశం కోసం ఫోటోలో లొకేషన్ ఉండాలి.</string>
 </resources>

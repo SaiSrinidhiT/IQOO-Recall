@@ -29,6 +29,7 @@ class EvalRunner(private val engine: QueryEngine) {
             when (r) {
                 is QueryResult.Pack -> Outcome(c, c.expectTemplate != null && r.templateId == c.expectTemplate, "pack:${r.templateId}")
                 is QueryResult.Chat -> Outcome(c, c.expectTypes.isEmpty() && c.expectTemplate == null, "chat")
+                is QueryResult.Photos -> Outcome(c, false, "photos:${r.category.db}")
                 is QueryResult.Reminders -> {
                     val top = r.docs.take(3).map { it.type() }
                     Outcome(c, top.any { it.name in c.expectTypes }, "reminders:" + top.joinToString(","))

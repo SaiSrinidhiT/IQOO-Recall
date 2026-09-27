@@ -92,6 +92,7 @@ dependencies {
     implementation(libs.mlkit.text.latin)
     implementation(libs.mlkit.text.devanagari)
     implementation(libs.mlkit.barcode)
+    implementation(libs.mlkit.face)
     implementation(libs.tesseract4android)
 
     implementation(libs.litert)

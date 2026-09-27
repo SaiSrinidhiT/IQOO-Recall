@@ -1,5 +1,8 @@
 package com.hackathon.recall.ui
 
+import com.hackathon.recall.model.PhotoCategory
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.foundation.layout.aspectRatio
 import android.content.Context
 import android.text.format.DateUtils
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -95,6 +98,7 @@ import com.hackathon.recall.i18n.docTypeName
 import com.hackathon.recall.i18n.templateName
 import com.hackathon.recall.model.DocType
 import com.hackathon.recall.search.OwnerIntent
+import com.hackathon.recall.search.PreviousFind
 import com.hackathon.recall.search.QueryResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -135,6 +139,7 @@ fun ResultsScreen(nav: NavHostController, initialQuery: String) {
     val snackbar = remember { SnackbarHostState() }
     val docsFlow = remember { container.repository.observeDocuments() }
     val docs by docsFlow.collectAsState(emptyList())
+    val currentDocs = remember(docs) { docs.associateBy { it.id } }
     var history by remember { mutableStateOf<List<SavedChat>>(emptyList()) }
     var relations by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
     var sharingId by remember { mutableStateOf<Long?>(null) }
@@ -174,6 +179,12 @@ fun ResultsScreen(nav: NavHostController, initialQuery: String) {
         val query = raw.trim()
         if (query.isEmpty()) return
         input = ""
+        // Captured before the new turn is appended: what the previous reply showed, so a rejection of
+        // it ("this is not the salary slip") or a repeat of the same request excludes those documents
+        // instead of deterministically finding them again.
+        val previousFind = (turns.lastOrNull()?.result as? QueryResult.Found)?.let { found ->
+            PreviousFind(found.intent.docTypes, found.hits.map { it.doc.id }.toSet())
+        }
         val id = (turns.lastOrNull()?.id ?: 0) + 1
         val conversation = state.chatId
         turns += Turn(id, query)
@@ -187,7 +198,7 @@ fun ResultsScreen(nav: NavHostController, initialQuery: String) {
                 }
             }
             val result = runCatching {
-                withContext(Dispatchers.Default) { container.queryEngine.ask(query, ownerFilter = ownerFilter, onToken = onToken) }
+                withContext(Dispatchers.Default) { container.queryEngine.ask(query, ownerFilter = ownerFilter, previousFind = previousFind, onToken = onToken) }
             }
             val i = turns.indexOfFirst { it.id == id }
             if (i >= 0) turns[i] = turns[i].copy(result = result.getOrNull(), failed = result.isFailure)
@@ -257,10 +268,12 @@ fun ResultsScreen(nav: NavHostController, initialQuery: String) {
                         items(turns, key = { it.id }) { turn ->
                             TurnView(
                                 turn = turn,
+                                current = currentDocs,
                                 sharingId = sharingId,
                                 onOpen = { nav.navigate(Routes.doc(it.id)) },
                                 onShare = ::share,
                                 onChecklist = { nav.navigate(Routes.checklist(it)) },
+                                onPhotos = { nav.navigate(Routes.photos(it)) },
                                 onScan = { nav.navigate(Routes.scan()) },
                             )
                         }
@@ -363,10 +376,12 @@ private fun SuggestionRow(text: String, onPick: (String) -> Unit) {
 @Composable
 private fun TurnView(
     turn: Turn,
+    current: Map<Long, DocumentEntity>,
     sharingId: Long?,
     onOpen: (DocumentEntity) -> Unit,
     onShare: (DocumentEntity) -> Unit,
     onChecklist: (String) -> Unit,
+    onPhotos: (String) -> Unit,
     onScan: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -386,7 +401,7 @@ private fun TurnView(
             AssistantAvatar()
             Spacer(Modifier.width(10.dp))
             Column(Modifier.weight(1f).padding(top = 3.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                AssistantReply(turn, result, sharingId, onOpen, onShare, onChecklist, onScan)
+                AssistantReply(turn, result, current, sharingId, onOpen, onShare, onChecklist, onPhotos, onScan)
             }
         }
     }
@@ -396,10 +411,12 @@ private fun TurnView(
 private fun AssistantReply(
     turn: Turn,
     result: QueryResult?,
+    current: Map<Long, DocumentEntity>,
     sharingId: Long?,
     onOpen: (DocumentEntity) -> Unit,
     onShare: (DocumentEntity) -> Unit,
     onChecklist: (String) -> Unit,
+    onPhotos: (String) -> Unit,
     onScan: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -410,10 +427,16 @@ private fun AssistantReply(
         result is QueryResult.Chat -> Reply(result.reply)
         result is QueryResult.Found -> {
             val cited = result.answer.citedDocIds.toSet()
-            val hits = result.hits.sortedByDescending { it.doc.id in cited }.map { it.doc }
+            val hits = currentMatches(result.hits.sortedByDescending { it.doc.id in cited }.map { it.doc }, result.intent.docTypes, current)
             if (hits.isEmpty()) {
-                Reply(stringResource(R.string.chat_not_found))
-                OutlinedButton(onClick = onScan) { Text(stringResource(R.string.chat_scan), fontWeight = FontWeight.Normal) }
+                if (result.excludedPrevious) {
+                    // The document exists and was already shown or rejected; offering to scan it again
+                    // would be wrong, so say plainly there is nothing else, not that nothing was found.
+                    Reply(result.answer.text)
+                } else {
+                    Reply(stringResource(R.string.chat_not_found))
+                    OutlinedButton(onClick = onScan) { Text(stringResource(R.string.chat_scan), fontWeight = FontWeight.Normal) }
+                }
             } else {
                 if (result.answer.text.isNotBlank()) Reply(result.answer.text)
                 val wantsPdf = turn.query.contains("pdf", ignoreCase = true) || turn.query.contains("पीडीएफ") || turn.query.contains("పీడీఎఫ్")
@@ -426,9 +449,31 @@ private fun AssistantReply(
             Reply(stringResource(R.string.chat_pack_ready, context.templateName(result.templateId)))
             OutlinedButton(onClick = { onChecklist(result.templateId) }) { Text(stringResource(R.string.chat_open_checklist), fontWeight = FontWeight.Normal) }
         }
+        result is QueryResult.Photos -> {
+            val name = stringResource(PhotoCategoryUi.label(result.category))
+            // "Ongole", "Selfies · Ongole" or "Food": exactly what was searched, nothing implied.
+            val title = when {
+                result.place == null -> name
+                result.category == PhotoCategory.PLACES -> result.place
+                else -> "$name · ${result.place}"
+            }
+            if (result.uris.isEmpty()) {
+                Reply(stringResource(R.string.chat_photos_none, title))
+            } else {
+                Reply(pluralStringResource(R.plurals.chat_photos_found, result.uris.size, title, result.uris.size))
+                result.uris.take(CHAT_PHOTOS).chunked(3).forEach { row ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        row.forEach { uri -> PhotoThumb(uri, Modifier.weight(1f).aspectRatio(1f).clickable { openPhoto(context, uri) }) }
+                        repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
+                    }
+                }
+            }
+            OutlinedButton(onClick = { onPhotos(result.category.db) }) { Text(stringResource(R.string.see_all_photos) + " · " + name, fontWeight = FontWeight.Normal) }
+        }
         result is QueryResult.Reminders -> {
-            Reply(stringResource(if (result.docs.isEmpty()) R.string.no_expiry_docs else R.string.chat_expiring))
-            result.docs.forEach { doc -> DocResultCard(doc, sharing = sharingId == doc.id, primaryShare = false, onOpen = { onOpen(doc) }, onShare = { onShare(doc) }) }
+            val docs = currentMatches(result.docs, result.intent.docTypes, current)
+            Reply(stringResource(if (docs.isEmpty()) R.string.no_expiry_docs else R.string.chat_expiring))
+            docs.forEach { doc -> DocResultCard(doc, sharing = sharingId == doc.id, primaryShare = false, onOpen = { onOpen(doc) }, onShare = { onShare(doc) }) }
         }
     }
 }
@@ -565,3 +610,6 @@ private fun suggestions(context: Context, docs: List<DocumentEntity>): List<Stri
         .forEach { out += context.getString(it) }
     return out.take(6)
 }
+
+/** Thumbnails shown in a chat reply; "See all" opens the full category. */
+private const val CHAT_PHOTOS = 9

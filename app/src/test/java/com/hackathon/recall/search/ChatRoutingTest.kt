@@ -47,6 +47,20 @@ class ChatRoutingTest {
         assertEquals(IntentKind.REMINDERS, kind("thanks, anything expiring soon?"))
     }
 
+    /** These name a document type, so IntentParser routes them from the rules without a Qwen call. */
+    @Test
+    fun `common document requests are recognised by the rules alone`() {
+        mapOf(
+            "show my pan card" to DocType.PAN,
+            "latest salary slip" to DocType.SALARY_SLIP,
+            "I need my car insurance papers" to DocType.VEHICLE_INSURANCE,
+            "send my resume as pdf" to DocType.RESUME,
+            "mera aadhaar dikhao" to DocType.AADHAAR,
+        ).forEach { (q, type) -> assertTrue("\"$q\" -> ${rules.parse(q, today).docTypes}", type in rules.parse(q, today).docTypes) }
+        // "latest" names no period: no date filter that would hide older slips.
+        assertEquals(null, rules.parse("latest salary slip", today).dateFrom)
+    }
+
     @Test
     fun `chatKind picks the kind of small talk for template replies`() {
         assertEquals("greeting", rules.chatKind("hello"))

@@ -52,6 +52,8 @@
     <string name="results_mode_llm">Qwen ने आपके दस्तावेज़ों से यह उत्तर लिखा</string>
     <string name="results_mode_rules">सहायक नियम मोड में है (भाषा मॉडल लोड नहीं हुआ)</string>
     <string name="answer_nothing_found">मुझे कोई मिलता-जुलता दस्तावेज़ नहीं मिला।</string>
+    <string name="answer_no_other_typed">मेरे पास बस यही %1$s सेव है।</string>
+    <string name="answer_no_other">मेरे पास बस यही एक सेव है।</string>
     <plurals name="answer_found_docs">
         <item quantity="one">%1$d दस्तावेज़ मिला: %2$s</item>
         <item quantity="other">%1$d दस्तावेज़ मिले: %2$s</item>
@@ -136,8 +138,6 @@
     <string name="perm_partial">केवल कुछ फ़ोटो</string>
     <string name="perm_denied">अनुमति नहीं</string>
     <string name="voice_langs">ऑफ़लाइन आवाज़ भाषाएँ</string>
-    <string name="skipped_images">गैर-दस्तावेज़ मानकर छोड़ी गई तस्वीरें</string>
-    <string name="action_mark_document">दस्तावेज़ मानें</string>
     <string name="allow_screen_capture">स्क्रीनशॉट और स्क्रीन मिररिंग की अनुमति दें (डेमो के लिए)</string>
     <string name="app_language">ऐप की भाषा</string>
 
@@ -192,4 +192,35 @@
     <string name="chat_reply_help">मैं आपके सेव किए दस्तावेज़ ढूँढता हूँ, उनसे सवालों के जवाब देता हूँ, आधार छिपाकर PDF शेयर करता हूँ और बताता हूँ कि क्या खत्म होने वाला है।</string>
     <string name="chat_reply_bye">अलविदा! आपके दस्तावेज़ इसी फ़ोन पर सुरक्षित हैं।</string>
     <string name="chat_reply_offtopic">मैं सिर्फ़ इस फ़ोन में सेव आपके दस्तावेज़ों में मदद कर सकता हूँ। पूछकर देखें: \"मेरा आधार दिखाओ\"।</string>
+    <string name="photo_cat_screenshot">स्क्रीनशॉट</string>
+    <string name="photo_cat_selfie">सेल्फ़ी</string>
+    <string name="photo_cat_people">लोग</string>
+    <string name="photo_cat_food">खाना</string>
+    <string name="photo_cat_places">यात्राएँ और जगहें</string>
+    <string name="photo_cat_bills">बिल और रसीदें</string>
+    <string name="photo_cat_documents">दस्तावेज़</string>
+    <string name="photo_cat_other">अन्य फ़ोटो</string>
+    <string name="your_gallery">आपकी गैलरी</string>
+    <string name="docs_count">%1$d दस्तावेज़</string>
+    <string name="photos_empty">अभी यहाँ कोई फ़ोटो नहीं। स्कैन के साथ फ़ोटो यहाँ आएँगी।</string>
+    <string name="places_not_trip">घर के पास की जगहें</string>
+    <string name="photo_open_failed">यह फ़ोटो खोलने के लिए कोई ऐप नहीं</string>
+    <string name="see_all_photos">सभी देखें</string>
+    <plurals name="photos_count">
+        <item quantity="one">%1$d फ़ोटो</item>
+        <item quantity="other">%1$d फ़ोटो</item>
+    </plurals>
+    <plurals name="trips_count">
+        <item quantity="one">%1$d यात्रा</item>
+        <item quantity="other">%1$d यात्राएँ</item>
+    </plurals>
+    <plurals name="chat_photos_found">
+        <item quantity="one">%1$s: %2$d फ़ोटो।</item>
+        <item quantity="other">%1$s: %2$d फ़ोटो।</item>
+    </plurals>
+    <plurals name="trip_photos">
+        <item quantity="one">%1$d फ़ोटो</item>
+        <item quantity="other">%1$d फ़ोटो</item>
+    </plurals>
+    <string name="chat_photos_none">%1$s: कोई फ़ोटो नहीं मिली। सिर्फ़ स्कैन हो चुकी फ़ोटो खोजी जा सकती हैं, और जगह के लिए फ़ोटो में लोकेशन होनी चाहिए।</string>
 </resources>

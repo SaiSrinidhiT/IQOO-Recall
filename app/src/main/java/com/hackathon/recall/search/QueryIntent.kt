@@ -2,6 +2,7 @@ package com.hackathon.recall.search
 
 import com.hackathon.recall.model.DocType
 import com.hackathon.recall.model.Lang
+import com.hackathon.recall.model.PhotoCategory
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.time.LocalDate
@@ -11,7 +12,10 @@ enum class IntentKind(val code: String) {
     FIND("find"), PACK("pack"), REMINDERS("reminders"), QUESTION("question"),
 
     /** Greetings, thanks, help, small talk, off-topic questions: answered in words, never with a search. */
-    CHAT("chat");
+    CHAT("chat"),
+
+    /** Gallery photos by category ("my selfies", "trip photos"), not documents. */
+    PHOTOS("photos");
 
     companion object {
         fun fromCode(v: String?): IntentKind? = entries.firstOrNull { it.code == v?.trim()?.lowercase() }
@@ -29,6 +33,7 @@ data class IntentJson(
     @SerialName("date_to") val dateTo: String? = null,
     @SerialName("answer_language") val answerLanguage: String? = null,
     val question: String? = null,
+    @SerialName("photo_category") val photoCategory: String? = null,
 )
 
 data class QueryIntent(
@@ -44,16 +49,20 @@ data class QueryIntent(
     val source: String,
     /** doc_types values the LLM produced that are not in the enum (dropped, brief §6.1). */
     val droppedDocTypes: List<String> = emptyList(),
+    /** For [IntentKind.PHOTOS]: which gallery category. */
+    val photoCategory: PhotoCategory? = null,
 )
 
 object IntentValidator {
+    /** Categories a chat message can ask for; Bills and Documents are answered from the vault instead. */
+    val PHOTO_CATEGORIES = setOf(PhotoCategory.SCREENSHOT, PhotoCategory.SELFIE, PhotoCategory.PEOPLE, PhotoCategory.FOOD, PhotoCategory.PLACES)
     val TEMPLATES = setOf("home_loan", "health_insurance_claim", "vehicle_insurance_renewal", "passport")
 
     /** Throws [IllegalArgumentException] with a message suitable for the one retry the brief allows. */
     fun validate(raw: IntentJson, originalQuery: String, detectedLang: Lang): QueryIntent {
         val kind = IntentKind.fromCode(raw.intent)
             ?: throw IllegalArgumentException(
-                "\"intent\" must be one of find, question, reminders, pack, chat (got ${raw.intent ?: "nothing"})",
+                "\"intent\" must be one of find, question, reminders, pack, chat, photos (got ${raw.intent ?: "nothing"})",
             )
         val template = clean(raw.taskTemplate)?.lowercase()?.takeIf { it in TEMPLATES }
         val parsedTypes = raw.docTypes.orEmpty().map { it to DocType.parse(it) }
@@ -62,7 +71,10 @@ object IntentValidator {
         val d1 = date(raw.dateFrom)
         val d2 = date(raw.dateTo)
         val (from, to) = if (d1 != null && d2 != null && d1.isAfter(d2)) d2 to d1 else d1 to d2
+        val photoCategory = clean(raw.photoCategory)?.lowercase()?.let(PhotoCategory::fromDb)?.takeIf { it in PHOTO_CATEGORIES }
         val resolved = when {
+            // A photos reply must say which photos; one that names a document is about the document.
+            kind == IntentKind.PHOTOS && (photoCategory == null || docTypes.isNotEmpty()) -> IntentKind.FIND
             kind == IntentKind.PACK && template == null && docTypes.isEmpty() -> IntentKind.FIND
             // A reply that says "chat" but names a document contradicts itself; the document wins.
             kind == IntentKind.CHAT && (docTypes.isNotEmpty() || template != null) -> IntentKind.FIND
@@ -79,6 +91,7 @@ object IntentValidator {
             question = clean(raw.question),
             source = "llm",
             droppedDocTypes = dropped,
+            photoCategory = photoCategory.takeIf { resolved == IntentKind.PHOTOS },
         )
     }
 

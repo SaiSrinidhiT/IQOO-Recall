@@ -55,5 +55,15 @@
     "thanks": ["thanks", "thank you", "thankyou", "thanku", "thx", "ty", "tq", "ok", "okay", "okk", "cool", "great", "nice", "super", "awesome", "perfect", "dhanyavad", "dhanyavaad", "shukriya", "dhanyavadalu", "धन्यवाद", "शुक्रिया", "ధన్యవాదాలు", "థాంక్స్"],
     "help": ["help", "what can you do", "who are you", "what are you", "how does this work", "how to use", "how do i use", "features", "madad", "sahayam", "मदद", "सहायता", "సహాయం"],
     "bye": ["bye", "goodbye", "good bye", "see you", "tata", "alvida", "बाय", "अलविदा", "బై", "సెలవు"]
+  },
+  "photo_categories": {
+    "SCREENSHOT": ["screenshot", "screenshots", "screen shot", "ss", "स्क्रीनशॉट", "స్క్రీన్‌షాట్", "స్క్రీన్ షాట్"],
+    "SELFIE": ["selfie", "selfies", "selfy", "सेल्फी", "सेल्फ़ी", "సెల్ఫీ"],
+    "PEOPLE": ["people", "group photo", "group photos", "friends", "friends photos", "family photos", "family photo", "with friends", "dost", "dosto", "snehitulu", "दोस्त", "दोस्तों", "परिवार की फोटो", "స్నేహితులు", "కుటుంబం ఫోటోలు", "ఫ్రెండ్స్"],
+    "FOOD": ["food", "food photos", "food pics", "meal", "lunch photos", "dinner photos", "breakfast photos", "khana", "bhojanam", "खाना", "खाने की फोटो", "భోజనం", "ఆహారం", "ఫుడ్"],
+    "PLACES": ["trip", "trips", "travel", "travel photos", "vacation", "holiday photos", "tour", "tour photos", "places", "place photos", "sightseeing", "yatra", "ghumne", "prayanam", "यात्रा", "ट्रिप", "घूमने", "ప్రయాణం", "ట్రిప్", "టూర్"]
+  },
+  "correction_words": {
+    "correction": ["not the right one", "wrong one", "this is wrong", "that's wrong", "that is wrong", "not this one", "not this", "not that one", "none of these", "not correct", "incorrect", "wrong document", "wrong file", "wrong image", "not what i asked", "not what i wanted", "this isn't it", "that isn't it", "this is not it", "that is not it", "this is not the", "that is not the", "this isn't the", "that isn't the", "that's not the", "this's not the", "it's not the", "is not the right", "isn't the right", "not the one", "yeh sahi nahi hai", "galat hai", "ye galat hai", "idi kaadu", "thappu", "यह सही नहीं है", "ये गलत है", "गलत है", "यह गलत है", "ఇది సరైనది కాదు", "ఇది తప్పు", "తప్పు ఫైల్", "ఇది కాదు"]
   }
 }

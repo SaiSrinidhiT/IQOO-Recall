@@ -44,6 +44,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -55,6 +56,7 @@ import com.hackathon.recall.i18n.templateName
 import com.hackathon.recall.ingest.IndexWorker
 import com.hackathon.recall.ingest.IngestPipeline
 import com.hackathon.recall.model.Lang
+import com.hackathon.recall.model.PhotoCategory
 import com.hackathon.recall.model.SourceKind
 import com.hackathon.recall.search.VoiceInput
 import kotlinx.coroutines.Dispatchers
@@ -105,11 +107,12 @@ fun photoAccess(context: Context): PhotoAccess {
     }
 }
 
+/** Photos plus their location (EXIF GPS, read on the phone only) so trips can be grouped. */
 fun photoPermissions(): Array<String> = when {
     Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE ->
-        arrayOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
-    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> arrayOf(Manifest.permission.READ_MEDIA_IMAGES)
-    else -> arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+        arrayOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED, Manifest.permission.ACCESS_MEDIA_LOCATION)
+    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> arrayOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.ACCESS_MEDIA_LOCATION)
+    else -> arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_MEDIA_LOCATION)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -122,6 +125,9 @@ fun HomeScreen(nav: NavHostController) {
     val docs by container.repository.observeDocuments().collectAsState(emptyList())
     val duplicates by container.repository.observeDuplicates().collectAsState(emptyList())
     val counts by container.database.indexState().observeCounts().collectAsState(emptyList())
+    val photoCountRows by remember { container.database.photos().observeCounts() }.collectAsState(emptyList())
+    val photoCounts = photoCountRows.associate { it.category to it.n }
+    val tripCount by remember { container.database.photos().observeTripCount() }.collectAsState(0)
     var access by remember { mutableStateOf(photoAccess(context)) }
     var query by rememberSaveable { mutableStateOf("") }
     var voiceLang by rememberSaveable { mutableStateOf(Lang.EN) }
@@ -148,8 +154,6 @@ fun HomeScreen(nav: NavHostController) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
         ) notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        // Finish deferred LLM steps (doc type, expiry pick) only if Qwen is already loaded.
-        if (container.models.llm.state.value is com.hackathon.recall.ml.LlmState.Ready) withContext(Dispatchers.Default) { container.enricher.runPending() }
     }
 
     Scaffold(
@@ -175,15 +179,6 @@ fun HomeScreen(nav: NavHostController) {
                     Text("iQOO Recall", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onBackground)
                     Text("English", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                // Locked chip
-                Surface(color = MaterialTheme.colorScheme.secondary, shape = CircleShape) {
-                    Row(Modifier.padding(horizontal = 8.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary)
-                        Spacer(Modifier.width(4.dp))
-                        Text("Locked", fontSize = 11.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.primary)
-                    }
-                }
-                Spacer(Modifier.width(8.dp))
                 // Profile
                 Box(Modifier.size(32.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape).clickable { nav.navigate(Routes.SETTINGS) }, contentAlignment = Alignment.Center) {
                     Text("A", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
@@ -217,77 +212,29 @@ fun HomeScreen(nav: NavHostController) {
                     )
                 }
 
-                // Categories
+                // Gallery categories: every photo filed as Screenshots, Selfies, People, Food, Trips & places,
+                // Bills or Documents (the vault). Counts update live as the scan files photos.
                 item {
-                    val byCategory = docs.groupingBy { DocCategory.of(it) }.eachCount()
-                    val identityCount = byCategory["identity"] ?: 0
-                    val incomeCount = byCategory["income"] ?: 0
-                    val healthCount = byCategory["health"] ?: 0
-                    val propertyCount = byCategory["property"] ?: 0
-
                     Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        Text("Categories", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
-                        Text("See all", color = MaterialTheme.colorScheme.primary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable { nav.navigate(Routes.VAULT) })
+                        Text(stringResource(R.string.your_gallery), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
+                        Text(stringResource(R.string.see_all_photos), color = MaterialTheme.colorScheme.primary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.clickable { nav.navigate(Routes.VAULT) })
                     }
-                    // 2x2 Grid using columns/rows
-                    Column(Modifier.padding(horizontal = 20.dp)) {
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Card(Modifier.weight(1f).clickable { nav.navigate(Routes.vaultCategory("identity")) }, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
-                                Column(Modifier.padding(14.dp)) {
-                                    Box(Modifier.size(36.dp).background(MaterialTheme.colorScheme.secondary, CircleShape), contentAlignment = Alignment.Center) { Icon(Icons.Default.Person, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp)) }
-                                    Spacer(Modifier.height(8.dp))
-                                    Text("Identity", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodySmall)
-                                    Text("$identityCount documents", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
-                            }
-                            Card(Modifier.weight(1f).clickable { nav.navigate(Routes.vaultCategory("income")) }, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
-                                Column(Modifier.padding(14.dp)) {
-                                    Box(Modifier.size(36.dp).background(MaterialTheme.colorScheme.secondary, CircleShape), contentAlignment = Alignment.Center) { Icon(Icons.Default.List, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp)) }
-                                    Spacer(Modifier.height(8.dp))
-                                    Text("Income", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodySmall)
-                                    Text("$incomeCount documents", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
-                            }
-                        }
-                        Spacer(Modifier.height(12.dp))
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Card(Modifier.weight(1f).clickable { nav.navigate(Routes.vaultCategory("health")) }, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
-                                Column(Modifier.padding(14.dp)) {
-                                    Box(Modifier.size(36.dp).background(MaterialTheme.colorScheme.secondary, CircleShape), contentAlignment = Alignment.Center) { Icon(Icons.Default.Favorite, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp)) }
-                                    Spacer(Modifier.height(8.dp))
-                                    Text("Health", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodySmall)
-                                    Text("$healthCount documents", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
-                            }
-                            Card(Modifier.weight(1f).clickable { nav.navigate(Routes.vaultCategory("property")) }, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
-                                Column(Modifier.padding(14.dp)) {
-                                    Box(Modifier.size(36.dp).background(MaterialTheme.colorScheme.secondary, CircleShape), contentAlignment = Alignment.Center) { Icon(Icons.Default.Home, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp)) }
-                                    Spacer(Modifier.height(8.dp))
-                                    Text("Property", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodySmall)
-                                    Text("$propertyCount documents", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Upcoming
-                item {
-                    val expiring = docs.filter { it.expiryOn != null }.sortedBy { it.expiryOn }.take(2)
-                    if (expiring.isNotEmpty()) {
-                        Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 16.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                            Text("Upcoming", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
-                        }
-                        Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            expiring.forEach { d ->
-                                Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
-                                    Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-                                        Box(Modifier.size(10.dp).background(Color(0xFFF44336), CircleShape))
-                                        Spacer(Modifier.width(12.dp))
-                                        Text(context.docTypeName(d.effectiveType()), modifier = Modifier.weight(1f), fontWeight = FontWeight.Medium, style = MaterialTheme.typography.bodySmall)
-                                        Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        PhotoCategoryUi.HOME.chunked(2).forEach { pair ->
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                pair.forEach { cat ->
+                                    val n = photoCounts[cat.db] ?: 0
+                                    val subtitle = when (cat) {
+                                        PhotoCategory.DOCUMENTS -> stringResource(R.string.docs_count, docs.size)
+                                        PhotoCategory.PLACES if tripCount > 0 ->
+                                            pluralStringResource(R.plurals.trips_count, tripCount, tripCount) + " · " + pluralStringResource(R.plurals.photos_count, n, n)
+                                        else -> pluralStringResource(R.plurals.photos_count, n, n)
+                                    }
+                                    GalleryTile(cat, subtitle, Modifier.weight(1f)) {
+                                        nav.navigate(if (cat == PhotoCategory.DOCUMENTS) Routes.VAULT else Routes.photos(cat.db))
                                     }
                                 }
+                                if (pair.size == 1) Spacer(Modifier.weight(1f))
                             }
                         }
                     }
@@ -352,6 +299,20 @@ fun HomeScreen(nav: NavHostController) {
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun GalleryTile(cat: PhotoCategory, subtitle: String, modifier: Modifier, onClick: () -> Unit) {
+    Card(modifier.clickable(onClick = onClick), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+        Column(Modifier.padding(14.dp)) {
+            Box(Modifier.size(36.dp).background(MaterialTheme.colorScheme.secondary, CircleShape), contentAlignment = Alignment.Center) {
+                Text(PhotoCategoryUi.glyph(cat), fontSize = 18.sp)
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(stringResource(PhotoCategoryUi.label(cat)), fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodySmall)
+            Text(subtitle, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
